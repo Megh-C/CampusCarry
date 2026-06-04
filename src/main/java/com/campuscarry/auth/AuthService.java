@@ -55,7 +55,7 @@ public class AuthService {
         EmailOtp otpEntity = EmailOtp.builder()
                 .email(email)
                 .otp(hashedOtp)
-                .expiresAt(LocalDateTime.now().plusMinutes(10))
+                .expiresAt(LocalDateTime.now().plusMinutes(1))
                 .isUsed(false)
                 .build();
 

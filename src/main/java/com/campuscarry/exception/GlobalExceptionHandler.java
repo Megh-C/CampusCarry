@@ -2,7 +2,7 @@ package com.campuscarry.exception;
 
 import com.campuscarry.dto.response.ApiResponseDto;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.coyote.BadRequestException;
+import com.campuscarry.exception.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;

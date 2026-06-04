@@ -83,6 +83,11 @@ public class User extends BaseEntity{
     @Builder.Default
     private Integer totalDeliveries = 0;
 
+    // UPI ID for receiving delivery payouts e.g. "name@upi"
+    // Optional - only required if student wants to deliver orders
+    @Column(name = "upi_id", length = 50)
+    private String upiId;
+
     //active delivery tracking-------------------------------------------------------------
     // True if the student has at least one accepted, in-progress delivery
     @Column(name = "is_on_delivery", nullable = false)
