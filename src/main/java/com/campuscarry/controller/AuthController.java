@@ -31,7 +31,7 @@ public class AuthController {
 
     // POST /api/v1/auth/signup/verify-otp
     @PostMapping("/signup/verify-otp")
-    public ResponseEntity<ApiResponse<MessageResponseDto>> verifyOtp(
+    public ResponseEntity<ApiResponseDto<MessageResponseDto>> verifyOtp(
             @Valid @RequestBody VerifyOtpRequestDto request) {
 
         MessageResponseDto response = authService.verifyOtp(request);
@@ -40,7 +40,7 @@ public class AuthController {
 
     // POST /api/v1/auth/signup/complete
     @PostMapping("/signup/complete")
-    public ResponseEntity<ApiResponse<MessageResponseDto>> completeSignup(
+    public ResponseEntity<ApiResponseDto<MessageResponseDto>> completeSignup(
             @Valid @RequestBody CompleteSignupRequestDto request) {
 
         MessageResponseDto response = authService.completeSignup(request);

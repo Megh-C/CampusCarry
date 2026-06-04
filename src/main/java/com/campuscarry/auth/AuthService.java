@@ -17,6 +17,7 @@ import com.campuscarry.exception.UnauthorizedException;
 import com.campuscarry.repository.EmailOtpRepository;
 import com.campuscarry.repository.UserRepository;
 import com.campuscarry.service.JwtService;
+import com.campuscarry.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,8 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 
-import static com.campuscarry.entity.enums.UserStatus.*;
-
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -34,28 +33,25 @@ public class AuthService {
     private final UserRepository userRepository;
     private final EmailOtpRepository emailOtpRepository;
     private final EmailService emailService;
-    private final com.campuscarry.service.JwtService jwtService;
+    private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
 
     // ── Step 1: Initiate Signup ──────────────────────────────────────
+    // Only generates and sends OTP. No user is created here.
 
     @Transactional
     public MessageResponseDto initiateSignup(InitiateSignupRequestDto request) {
         String email = request.getEmail().toLowerCase().trim();
 
-        // If already ACTIVE, they have an account — direct to login
-        userRepository.findByEmail(email).ifPresent(user -> {
-            if (user.getStatus() == UserStatus.ACTIVE) {
-                throw new ConflictException("An account with this email already exists. Please login.");
-            }
-        });
+        // Block if a fully active account already exists for this email
+        if (userRepository.existsByEmail(email)) {
+            throw new ConflictException("An account with this email already exists. Please login.");
+        }
 
-        // Generate 6-digit OTP
+        // Generate 6-digit OTP and save hashed
         String rawOtp = generateOtp();
         String hashedOtp = passwordEncoder.encode(rawOtp);
 
-        // Save OTP entry — invalidate previous unused OTPs implicitly
-        // (we always fetch the latest one, old ones become unreachable)
         EmailOtp otpEntity = EmailOtp.builder()
                 .email(email)
                 .otp(hashedOtp)
@@ -65,23 +61,14 @@ public class AuthService {
 
         emailOtpRepository.save(otpEntity);
 
-        // Create a PENDING user shell if not already exists
-        if (!userRepository.existsByEmail(email)) {
-            User pendingUser = User.builder()
-                    .email(email)
-                    .status(UserStatus.PENDING)
-                    .role(Role.STUDENT)
-                    .build();
-            userRepository.save(pendingUser);
-        }
-
-        // Send OTP email
+        // Send OTP to email — async, won't block response
         emailService.sendOtpEmail(email, rawOtp);
 
         return new MessageResponseDto("OTP sent to " + email + ". Valid for 10 minutes.");
     }
 
     // ── Step 2: Verify OTP ───────────────────────────────────────────
+    // Only validates OTP and marks it used. No user is created here.
 
     @Transactional
     public MessageResponseDto verifyOtp(VerifyOtpRequestDto request) {
@@ -89,7 +76,8 @@ public class AuthService {
 
         EmailOtp otpEntity = emailOtpRepository
                 .findTopByEmailAndIsUsedFalseOrderByCreatedAtDesc(email)
-                .orElseThrow(() -> new BadRequestException("No OTP found for this email. Please request a new one."));
+                .orElseThrow(() -> new BadRequestException(
+                        "No OTP found for this email. Please request a new one."));
 
         if (!otpEntity.isValid()) {
             throw new BadRequestException("OTP has expired. Please request a new one.");
@@ -99,32 +87,33 @@ public class AuthService {
             throw new BadRequestException("Invalid OTP. Please try again.");
         }
 
-        // Mark OTP as used
+        // Mark OTP as used so it cannot be reused
         otpEntity.setUsed(true);
         emailOtpRepository.save(otpEntity);
 
-        // Flip user status to OTP_VERIFIED
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
-
-        user.setStatus(OTP_VERIFIED);
-        userRepository.save(user);
-
-        return new MessageResponseDto("OTP verified successfully. Please complete your profile.");
+        return new MessageResponseDto("Email verified successfully. Please complete your profile.");
     }
 
     // ── Step 3: Complete Signup ──────────────────────────────────────
+    // User is created HERE for the first time, directly as ACTIVE.
+    // Validates that OTP was actually verified before allowing this step.
 
     @Transactional
     public MessageResponseDto completeSignup(CompleteSignupRequestDto request) {
         String email = request.getEmail().toLowerCase().trim();
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
+        // Guard: user should not already exist at this point
+        if (userRepository.existsByEmail(email)) {
+            throw new ConflictException("An account with this email already exists. Please login.");
+        }
 
-        // Only allow profile completion after OTP verification
-        if (user.getStatus() != OTP_VERIFIED) {
-            throw new BadRequestException("Email not verified. Please verify your OTP first.");
+        // Guard: OTP must have been verified for this email before profile can be completed
+        // We check that a used OTP exists — proof that step 2 was completed
+        boolean otpWasVerified = emailOtpRepository
+                .existsByEmailAndIsUsedTrue(email);
+
+        if (!otpWasVerified) {
+            throw new BadRequestException("Email OTP not verified. Please complete verification first.");
         }
 
         // Passwords must match
@@ -137,14 +126,23 @@ public class AuthService {
             throw new ConflictException("This phone number is already registered.");
         }
 
-        // Complete the user profile
-        user.setFullName(request.getFullName());
-        user.setPhone(request.getPhone());
-        user.setGender(request.getGender());
-        user.setYear(request.getYear());
-        user.setHostelBlock(request.getHostelBlock().toUpperCase());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setStatus(UserStatus.ACTIVE);
+        // Create the user for the first time — directly ACTIVE
+        User user = User.builder()
+                .email(email)
+                .fullName(request.getFullName())
+                .phone(request.getPhone())
+                .gender(request.getGender())
+                .year(request.getYear())
+                .hostelBlock(request.getHostelBlock().toUpperCase())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(Role.STUDENT)
+                .status(UserStatus.ACTIVE)
+                .totalDeliveries(0)
+                .activeSmall(0)
+                .activeMedium(0)
+                .activeLarge(0)
+                .isOnDelivery(false)
+                .build();
 
         userRepository.save(user);
 
@@ -159,12 +157,12 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UnauthorizedException("Invalid email or password."));
 
-        // Check account status before even verifying password
+        // Check account status before verifying password
         switch (user.getStatus()) {
-            case PENDING -> throw new UnauthorizedException("Please verify your email OTP first.");
-            case OTP_VERIFIED -> throw new UnauthorizedException("Please complete your profile setup first.");
-            case SUSPENDED -> throw new UnauthorizedException("Your account has been suspended. Contact support.");
-            case BANNED -> throw new UnauthorizedException("Your account has been permanently banned.");
+            case SUSPENDED -> throw new UnauthorizedException(
+                    "Your account has been suspended. Please contact support.");
+            case BANNED -> throw new UnauthorizedException(
+                    "Your account has been permanently banned.");
             default -> { /* ACTIVE — continue */ }
         }
 
@@ -187,7 +185,7 @@ public class AuthService {
                 .build();
     }
 
-    // ── Private Helpers ────────────────────3──────────────────────────
+    // ── Private Helpers ──────────────────────────────────────────────
 
     private String generateOtp() {
         SecureRandom random = new SecureRandom();
