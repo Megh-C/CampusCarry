@@ -37,4 +37,27 @@ public class OrderExpiryScheduler {
                     " orders as EXPIRED at " + LocalDateTime.now());
         }
     }
+
+    /**
+     * Runs every hour.
+     * Nullifies the OTP on orders where otpExpiresAt has passed.
+     * This means a 5-hour-old OTP can no longer be used for delivery confirmation.
+     * Does NOT change order status — just wipes the OTP field.
+     *
+     * Why hourly and not every 10 mins?
+     * OTPs last 5 hours so checking every hour is more than precise enough.
+     * No point running it as frequently as the order expiry job.
+     *
+     * Cron: "0 0 * * * *" → fires at the top of every hour
+     */
+    @Async
+    @Scheduled(cron = "0 0 * * * *")
+    @Transactional
+    public void expireOrderOtps() {
+        int clearedCount = orderRepository.clearExpiredOtps(LocalDateTime.now());
+        if (clearedCount > 0) {
+            System.out.println("[OrderExpiryScheduler] Cleared OTP on " + clearedCount
+                    + " orders at " + LocalDateTime.now());
+        }
+    }
 }

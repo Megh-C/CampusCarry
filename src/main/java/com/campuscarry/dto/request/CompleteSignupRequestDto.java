@@ -31,7 +31,10 @@ public class CompleteSignupRequestDto {
     private Integer year;
 
     @NotBlank(message = "Hostel block is required")
-    @Pattern(regexp = "^[A-Za-z]$", message = "Hostel block must be a single letter")
+    @Pattern(
+            regexp = "^[A-Za-z]{1,2}_(MH|LH)$",
+            message = "Hostel block must be in format X_MH or X_LH"
+    )
     private String hostelBlock;
 
     @NotBlank(message = "Password is required")

@@ -11,8 +11,10 @@ import com.campuscarry.entity.enums.PaymentStatus;
 import com.campuscarry.exception.BadRequestException;
 import com.campuscarry.exception.ForbiddenException;
 import com.campuscarry.exception.ResourceNotFoundException;
+import com.campuscarry.payment.PaymentService;
 import com.campuscarry.repository.OrderRepository;
 import com.campuscarry.repository.UserRepository;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +37,8 @@ public class OrderService {
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private final PricingService pricingService;
+    private final PaymentService paymentService;
 
     // ── Create Order ─────────────────────────────────────────────────
     // Called by: POST /orders
@@ -54,7 +58,6 @@ public class OrderService {
         }
 
         // Calculate delivery fee based on pickup location + drop hostel block
-        // TODO: Wire to LocationClusterPricing table once Location module is built
         // For now returns a placeholder fee
         BigDecimal deliveryFee = calculateDeliveryFee(
                 request.getPickupLocationId(),
@@ -81,8 +84,9 @@ public class OrderService {
 
         orderRepository.save(order);
 
-        // TODO: Initiate Razorpay payment hold here once payment module is wired
-        // razorpayService.createOrder(order.getId(), deliveryFee, requester);
+        // Initiate payment collection from requester
+        // Mock for now — real Razorpay call when gateway is integrated
+        paymentService.initiateCollection(order, requester);
 
         return mapToOrderResponse(order, requesterId);
     }
@@ -250,8 +254,9 @@ public class OrderService {
         deliverer.setTotalDeliveries(deliverer.getTotalDeliveries() + 1);
         userRepository.save(deliverer);
 
-        // TODO: Trigger Razorpay payout to deliverer's UPI ID here
-        // razorpayService.releasePayout(deliverer.getUpiId(), order.getDeliveryFee());
+        /// Trigger automatic payout to deliverer's UPI ID
+        // Retried up to 3 times by PaymentRetryScheduler if it fails
+        paymentService.initiatePayout(order, deliverer);
 
         return mapToOrderResponse(order, delivererId);
     }
@@ -310,19 +315,12 @@ public class OrderService {
 
     // Fee calculation placeholder - will be replaced with LocationClusterPricing lookup
     // Formula: baseFeeBySize + distanceSurchargeByCluster
+    // Calculates delivery fee using the real LocationClusterPricing matrix
+// Formula: basePrice (location × cluster) + sizeSurcharge (SMALL=0, MEDIUM=7, LARGE=15)
     private BigDecimal calculateDeliveryFee(UUID pickupLocationId,
-                                            String dropHostelBlock, String size) {
-        // TODO: Replace with DB lookup once Location + LocationClusterPricing is built
-        // Base fee by size
-        BigDecimal baseFee = switch (size.toUpperCase()) {
-            case "SMALL"  -> new BigDecimal("10.00");
-            case "MEDIUM" -> new BigDecimal("20.00");
-            case "LARGE"  -> new BigDecimal("35.00");
-            default -> new BigDecimal("10.00");
-        };
-        // Placeholder distance surcharge until cluster pricing is wired
-        BigDecimal distanceSurcharge = new BigDecimal("5.00");
-        return baseFee.add(distanceSurcharge);
+                                            String dropHostelBlock,
+                                            String size) {
+        return pricingService.calculateFee(pickupLocationId, dropHostelBlock, size);
     }
 
     private String generateOtp() {

@@ -27,8 +27,12 @@ public class CreateOrderRequestDto {
     @NotNull(message = "Order size is required")
     private OrderSize size;
 
-    // Destination hostel block letter - cluster derived at service layer
+    // Format: A_MH (mens hostel) or A_LH (ladies hostel)
+    // Cluster is derived at service layer from this value — not stored separately
     @NotBlank(message = "Drop hostel block is required")
-    @Pattern(regexp = "^[A-Za-z]$", message = "Hostel block must be a single letter")
+    @Pattern(
+            regexp = "^[A-Za-z]{1,2}_(MH|LH)$",
+            message = "Hostel block must be in format A_MH or A_LH"
+    )
     private String dropHostelBlock;
 }

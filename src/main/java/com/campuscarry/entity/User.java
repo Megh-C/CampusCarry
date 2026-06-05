@@ -60,13 +60,15 @@ public class User extends BaseEntity{
     @Column(name = "year", nullable = false)
     private Integer year;
 
-    // Stores the block letter only (A, B, C ...).
-    // Full block name is derived as: hostelBlock + gender (e.g. A + MALE = A MH, A + FEMALE = A LH)
-    //in front end give options A,B,C,D
-    @Column(name = "hostel_block", nullable = false, length = 5)
+    // Stored in full format: A_MH (mens) or A_LH (ladies)
+    // Cluster is derived from this at runtime — never stored separately
+    @Column(name = "hostel_block", nullable = false, length = 10)
     private String hostelBlock;
 
-
+    // UPI ID for receiving delivery payouts e.g. "name@upi"
+    // Optional — only needed when student wants to act as deliverer
+    @Column(name = "upi_id", length = 50)
+    private String upiId;
 
     //role --------------------------------------------------------------------
     @Enumerated(EnumType.STRING)
@@ -83,10 +85,6 @@ public class User extends BaseEntity{
     @Builder.Default
     private Integer totalDeliveries = 0;
 
-    // UPI ID for receiving delivery payouts e.g. "name@upi"
-    // Optional - only required if student wants to deliver orders
-    @Column(name = "upi_id", length = 50)
-    private String upiId;
 
     //active delivery tracking-------------------------------------------------------------
     // True if the student has at least one accepted, in-progress delivery
@@ -111,19 +109,7 @@ public class User extends BaseEntity{
     @Builder.Default
     private Integer activeLarge = 0;
 
-    /**
-     * Returns the full hostel block display name.
-     * e.g. hostelBlock="A", gender=MALE  → "A MH"
-     *      hostelBlock="D", gender=FEMALE → "D WH"
-     */
-    public String getFullHostelBlock() {
-        if (gender == Gender.FEMALE) {
-            return hostelBlock + " LH";
-        } else if (gender == Gender.MALE) {
-            return hostelBlock + " MH";
-        }
-        return hostelBlock;
-    }
+
 
     public boolean canAcceptOrder(String orderSize) {
         return switch (orderSize.toUpperCase()) {
