@@ -1,5 +1,6 @@
 package com.campuscarry.auth;
 
+import com.campuscarry.config.RateLimitConfig;
 import com.campuscarry.dto.request.CompleteSignupRequestDto;
 import com.campuscarry.dto.request.InitiateSignupRequestDto;
 import com.campuscarry.dto.request.LoginRequestDto;
@@ -18,6 +19,7 @@ import com.campuscarry.repository.EmailOtpRepository;
 import com.campuscarry.repository.UserRepository;
 import com.campuscarry.service.JwtService;
 import com.campuscarry.service.EmailService;
+import io.github.bucket4j.Bucket;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,7 @@ public class AuthService {
     private final EmailService emailService;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final RateLimitConfig rateLimitConfig;
 
     // ── Step 1: Initiate Signup ──────────────────────────────────────
     // Only generates and sends OTP. No user is created here.
@@ -43,6 +46,11 @@ public class AuthService {
     public MessageResponseDto initiateSignup(InitiateSignupRequestDto request) {
         String email = request.getEmail().toLowerCase().trim();
 
+        Bucket otpBucket = rateLimitConfig.resolveOtpBucket(email);
+        if (!otpBucket.tryConsume(1)) {
+            throw new BadRequestException(
+                    "Please wait 2 minutes before requesting another OTP.");
+        }
         // Block if a fully active account already exists for this email
         if (userRepository.existsByEmail(email)) {
             throw new ConflictException("An account with this email already exists. Please login.");

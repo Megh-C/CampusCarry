@@ -1,5 +1,6 @@
 package com.campuscarry.service;
 
+import com.campuscarry.config.RateLimitConfig;
 import com.campuscarry.dto.request.ForgotPasswordRequestDto;
 import com.campuscarry.dto.request.ResetPasswordRequestDto;
 import com.campuscarry.dto.response.MessageResponseDto;
@@ -9,6 +10,7 @@ import com.campuscarry.exception.BadRequestException;
 import com.campuscarry.exception.ResourceNotFoundException;
 import com.campuscarry.repository.EmailOtpRepository;
 import com.campuscarry.repository.UserRepository;
+import io.github.bucket4j.Bucket;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ public class ForgotPasswordService {
     private final EmailOtpRepository emailOtpRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private final RateLimitConfig rateLimitConfig;
 
     // ── Step 1: Send OTP ─────────────────────────────────────────────
 
@@ -39,6 +42,13 @@ public class ForgotPasswordService {
     @Transactional
     public MessageResponseDto sendResetOtp(ForgotPasswordRequestDto request) {
         String email = request.getEmail().toLowerCase().trim();
+
+        // OTP cooldown — prevent spam, max 1 OTP request per email per 2 minutes
+        Bucket otpBucket = rateLimitConfig.resolveOtpBucket(email);
+        if (!otpBucket.tryConsume(1)) {
+            throw new BadRequestException(
+                    "Please wait 2 minutes before requesting another OTP.");
+        }
 
         // Silently do nothing if email not found — same message either way
         userRepository.findByEmail(email).ifPresent(user -> {
