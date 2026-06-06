@@ -2,12 +2,18 @@ package com.campuscarry.config;
 
 import com.campuscarry.entity.Location;
 import com.campuscarry.entity.LocationClusterPricing;
+import com.campuscarry.entity.User;
+import com.campuscarry.entity.enums.Gender;
 import com.campuscarry.entity.enums.HostelCluster;
+import com.campuscarry.entity.enums.Role;
+import com.campuscarry.entity.enums.UserStatus;
 import com.campuscarry.repository.LocationClusterPricingRepository;
 import com.campuscarry.repository.LocationRepository;
+import com.campuscarry.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,12 +34,16 @@ public class DataSeeder implements ApplicationRunner {
 
     private final LocationRepository locationRepository;
     private final LocationClusterPricingRepository pricingRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
         seedLocations();
         seedPricingMatrix();
+        seedAdminUser();;
         System.out.println("[DataSeeder] Locations and pricing matrix ready.");
     }
 
@@ -119,5 +129,28 @@ public class DataSeeder implements ApplicationRunner {
                 }
             }
         });
+    }
+
+    private void seedAdminUser() {
+        String adminEmail = "admin@campuscarry.com";
+        if (!userRepository.existsByEmail(adminEmail)) {
+            userRepository.save(User.builder()
+                    .email(adminEmail)
+                    .password(passwordEncoder.encode("Admin@1234"))
+                    .fullName("CampusCarry Admin")
+                    .phone("9999999999")
+                    .gender(Gender.MALE)
+                    .year(1)
+                    .hostelBlock("A_MH")
+                    .role(Role.ADMIN)
+                    .status(UserStatus.ACTIVE)
+                    .totalDeliveries(0)
+                    .activeSmall(0)
+                    .activeMedium(0)
+                    .activeLarge(0)
+                    .isOnDelivery(false)
+                    .build());
+            System.out.println("[DataSeeder] Admin user created — admin@campuscarry.com / Admin@1234");
+        }
     }
 }

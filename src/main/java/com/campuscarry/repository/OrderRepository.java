@@ -1,22 +1,27 @@
 package com.campuscarry.repository;
 
 import com.campuscarry.entity.Order;
+import com.campuscarry.entity.User;
+import com.campuscarry.entity.enums.OrderSize;
 import com.campuscarry.entity.enums.OrderStatus;
+import com.campuscarry.entity.enums.PaymentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface OrderRepository extends JpaRepository<Order, UUID> {
+public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecificationExecutor<Order> {
 
     // ── Feed Queries ─────────────────────────────────────────────────
 
@@ -62,11 +67,55 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     // ── Admin Queries ────────────────────────────────────────────────
 
     // Admin dashboard - all orders with any status, paginated
-    Page<Order> findAllByOrderByCreatedAtDesc(Pageable pageable);
+    // Full search + filter for admin orders dashboard
+    // Searches by order number or description
+    // Filters by status, size, payment status, date range
+    @Query("""
+            SELECT o FROM Order o
+            WHERE (:search IS NULL OR
+                   CAST(o.orderNumber AS string) LIKE CONCAT('%', :search, '%') OR
+                   LOWER(o.description) LIKE LOWER(CONCAT('%', :search, '%')))
+            AND   (:status        IS NULL OR o.status        = :status)
+            AND   (:size          IS NULL OR o.size          = :size)
+            AND   (:paymentStatus IS NULL OR o.paymentStatus = :paymentStatus)
+            AND   (:from          IS NULL OR o.createdAt    >= :from)
+            AND   (:to            IS NULL OR o.createdAt    <= :to)
+            """)
+    Page<Order> findAllWithFilters(
+            @Param("search") String search,
+            @Param("status") OrderStatus status,
+            @Param("size") OrderSize size,
+            @Param("paymentStatus") PaymentStatus paymentStatus,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            Pageable pageable
+    );
 
-    // Admin stats - count orders by status for a given day
-    @Query("SELECT COUNT(o) FROM Order o WHERE o.createdAt >= :startOfDay AND o.status = :status")
-    long countOrdersByStatusSince(
-            @Param("startOfDay") LocalDateTime startOfDay,
-            @Param("status") OrderStatus status);
+    // Count orders by status in date range — for stats
+    @Query("""
+            SELECT COUNT(o) FROM Order o
+            WHERE o.status = :status
+            AND   o.createdAt >= :from
+            AND   o.createdAt <= :to
+            """)
+    long countByStatusAndDateRange(
+            @Param("status") OrderStatus status,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to
+    );
+
+    // Total revenue (sum of delivery fees) for DELIVERED orders in date range
+    @Query("""
+            SELECT COALESCE(SUM(o.deliveryFee), 0) FROM Order o
+            WHERE o.status = 'DELIVERED'
+            AND   o.createdAt >= :from
+            AND   o.createdAt <= :to
+            """)
+    BigDecimal sumDeliveryFeeByDateRange(
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to
+    );
+
+    // Failed payments count — orders where payment failed after all retries
+    long countByPaymentStatus(PaymentStatus paymentStatus);
 }
