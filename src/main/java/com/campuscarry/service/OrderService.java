@@ -120,23 +120,28 @@ public class OrderService {
     @Transactional
     public OrderResponseDto acceptOrder(UUID orderId, UUID delivererId) {
 
+        //TESTED AND THIS EDGE CASE IS WORKING
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found."));
 
+        //EDGE CASE WORKING HAVE TO CHANGE THE CRON JOB LOGIC
         // Only PENDING orders can be accepted
         if (order.getStatus() != OrderStatus.PENDING) {
             throw new BadRequestException("This order is no longer available.");
         }
 
+        //THIS EDGE CASE ALSO WORKING
         // Requester cannot deliver their own order
         if (order.getRequester().getId().equals(delivererId)) {
             throw new ForbiddenException("You cannot deliver your own order.");
         }
 
+        //CANT CHECK THIS WONT GENERALLY HAPPEN JUST A SANITY CHECK -> DELIVERER IS COMING FROM AUTH NOT REQUEST BODY
         User deliverer = userRepository.findById(delivererId)
                 .orElseThrow(() -> new ResourceNotFoundException("Deliverer not found."));
 
-        // Check if deliverer has capacity for this order size
+
+        // THIS IS ALSO WORKING BUT CHECK THE FUNCTION LOGIC ONCE WHEN CAN AND CANT ACCEPT
         // Uses canAcceptOrder() defined on User entity
         if (!deliverer.canAcceptOrder(order.getSize().name())) {
             throw new BadRequestException(
@@ -184,6 +189,7 @@ public class OrderService {
     @Transactional
     public OrderResponseDto notifyArrival(UUID orderId, UUID delivererId) {
 
+        //EDGE CASE WORKING CHECKED
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found."));
 
@@ -220,14 +226,17 @@ public class OrderService {
     public OrderResponseDto confirmDelivery(UUID orderId, DeliverOrderRequestDto request,
                                             UUID delivererId) {
 
+        //EDGE CASE WORKING
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found."));
 
+        //EDGE CASE WORKING
         // Only the assigned deliverer can confirm delivery
         if (!order.getDeliverer().getId().equals(delivererId)) {
             throw new ForbiddenException("You are not the deliverer for this order.");
         }
 
+        //EDGE CASE WORKING
         if (order.getStatus() != OrderStatus.ACCEPTED) {
             throw new BadRequestException("Order is not in an active delivery state.");
         }
@@ -238,6 +247,7 @@ public class OrderService {
                     "OTP has expired. Please contact support to resolve this delivery.");
         }
 
+        //EDGE CASE WORKING
         // Validate OTP value against stored hash
         if (!passwordEncoder.matches(request.getOtp(), order.getOtp())) {
             throw new BadRequestException("Invalid OTP. Please try again.");

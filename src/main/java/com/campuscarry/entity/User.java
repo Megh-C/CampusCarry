@@ -116,7 +116,7 @@ public class User extends BaseEntity{
             case "LARGE" ->
                     activeLarge == 0 && activeMedium == 0 && activeSmall == 0;
             case "MEDIUM" ->
-                    activeLarge == 0 && (activeMedium < 2 || (activeMedium == 0 && activeSmall < 2));
+                    activeLarge == 0 && ((activeMedium == 0 && activeSmall < 2)||(activeMedium < 2 && activeSmall==0));
             case "SMALL" ->
                     activeLarge == 0 && (activeSmall < 3 || (activeMedium == 1 && activeSmall == 0));
             default -> false;
