@@ -115,6 +115,11 @@ public class Order extends BaseEntity {
     @Column(name = "otp_expires_at")
     private LocalDateTime otpExpiresAt;
 
+    // Set when deliverer accepts — requester must pay within 5 minutes
+    // Scheduler checks this every minute — if passed and paymentStatus != HELD → UNPAID
+    @Column(name = "payment_deadline")
+    private LocalDateTime paymentDeadline;
+
     // ── Payment ──────────────────────────────────────────────────────
 
     @Enumerated(EnumType.STRING)
@@ -131,6 +136,18 @@ public class Order extends BaseEntity {
     @Column(name = "razorpay_payout_id", length = 100)
     private String razorpayPayoutId;
 
+    // Set to true when requester submits a rating after delivery
+    // Frontend uses this to know whether to show the rating prompt
+    @Column(name = "is_rated")
+    @Builder.Default
+    private boolean isRated = false;
+
+    // Set to true when requester explicitly skips rating
+    // Frontend uses this to show "Rate this delivery" button in history instead of prompt
+    @Column(name = "is_rating_skipped")
+    @Builder.Default
+    private boolean isRatingSkipped = false;
+
     // ── Helper Methods ───────────────────────────────────────────────
 
     // Quick check used by scheduler and service layer
@@ -145,17 +162,12 @@ public class Order extends BaseEntity {
                 LocalDateTime.now().isBefore(otpExpiresAt);
     }
 
-    // Set to true when requester submits a rating after delivery
-    // Frontend uses this to know whether to show the rating prompt
-    @Column(name = "is_rated")
-    @Builder.Default
-    private boolean isRated = false;
+    // Checks if payment window has passed without payment being made
+    public boolean isPaymentDeadlinePassed() {
+        return this.paymentDeadline != null &&
+                LocalDateTime.now().isAfter(this.paymentDeadline);
+    }
 
-    // Set to true when requester explicitly skips rating
-    // Frontend uses this to show "Rate this delivery" button in history instead of prompt
-    @Column(name = "is_rating_skipped")
-    @Builder.Default
-    private boolean isRatingSkipped = false;
 
 
 }

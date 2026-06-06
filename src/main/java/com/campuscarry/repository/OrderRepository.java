@@ -51,18 +51,19 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecific
 
     // ── Scheduler Queries ────────────────────────────────────────────
 
-    // Called by OrderExpiryScheduler every 10 mins.
+
     // Bulk updates all PENDING orders past their expiresAt to EXPIRED.
     @Modifying
     @Query("UPDATE Order o SET o.status = 'EXPIRED' WHERE o.status = 'PENDING' AND o.expiresAt < :now")
     int expireOverdueOrders(@Param("now") LocalDateTime now);
 
-    // Every hour — nullifies OTP on orders where otpExpiresAt has passed
-    // OTP field is wiped so it can no longer be used for delivery confirmation
-    @Modifying
-    @Query("UPDATE Order o SET o.otp = NULL, o.otpExpiresAt = NULL " +
-            "WHERE o.otp IS NOT NULL AND o.otpExpiresAt < :now")
-    int clearExpiredOtps(@Param("now") LocalDateTime now);
+    // Finds ACCEPTED orders past payment deadline where payment is still PENDING
+    // These are orders where requester didn't pay within 5 mins of acceptance
+    @Query("SELECT o FROM Order o " +
+            "WHERE o.status = 'ACCEPTED' " +
+            "AND o.paymentDeadline < :now " +
+            "AND o.paymentStatus = 'PENDING'")
+    List<Order> findAcceptedOrdersPastPaymentDeadline(@Param("now") LocalDateTime now);
 
     // ── Admin Queries ────────────────────────────────────────────────
 
@@ -118,4 +119,6 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecific
 
     // Failed payments count — orders where payment failed after all retries
     long countByPaymentStatus(PaymentStatus paymentStatus);
+
+
 }

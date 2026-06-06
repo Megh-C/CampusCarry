@@ -29,30 +29,21 @@ public class PaymentService {
     // ── Collection ───────────────────────────────────────────────────
 
     /**
-     * Called from OrderService.createOrder() immediately after order is saved.
-     *
-     * Creates a COLLECTION payment record and marks it SUCCESS (mocked).
-     * Updates order.paymentStatus → HELD to indicate fee is secured.
-     *
-     * Real flow when Razorpay is integrated:
-     *   - gatewayRef will be a real Razorpay order ID
-     *   - Frontend uses this ID to open the Razorpay UPI payment modal
-     *   - Payment is only confirmed via webhook (not here directly)
-     *   - Order appears on feed only AFTER webhook confirms payment
+     * Called from OrderService.acceptOrder() — NOT at order creation.
+     * Payment is initiated only when a deliverer accepts the order.
+     * Requester has 5 minutes to complete payment (paymentDeadline on Order).
+     * Mocked — always marks HELD immediately.
+     * Real Razorpay: creates order, frontend opens UPI payment modal.
      */
     @Transactional
     public void initiateCollection(Order order, User requester) {
-        // Call gateway to collect fee from requester
         String gatewayRef = gatewayService.collectPayment(
-                order.getDeliveryFee(),
-                requester.getEmail()
-        );
+                order.getDeliveryFee(), requester.getEmail());
 
-        // Record the collection payment
         Payment payment = Payment.builder()
                 .order(order)
                 .payer(requester)
-                .payee(requester)   // Payee is CampusCarry — using requester as placeholder for mock
+                .payee(requester)
                 .type(PaymentType.COLLECTION)
                 .status(PaymentTransactionStatus.SUCCESS)
                 .amount(order.getDeliveryFee())
@@ -62,7 +53,8 @@ public class PaymentService {
 
         paymentRepository.save(payment);
 
-        // Mark order payment as HELD — fee is secured, safe to show on feed
+        // Mock: immediately marks HELD
+        // Real: only marked HELD after Razorpay webhook confirms payment
         order.setPaymentStatus(PaymentStatus.HELD);
         orderRepository.save(order);
     }
@@ -70,43 +62,25 @@ public class PaymentService {
     // ── Payout ───────────────────────────────────────────────────────
 
     /**
-     * Called from OrderService.confirmDelivery() after OTP is validated
-     * and order status is flipped to DELIVERED.
-     *
-     * Attempts to pay out the delivery fee to the deliverer's UPI ID.
-     * On success → order.paymentStatus = RELEASED
-     * On failure → creates FAILED payment record, retry scheduler picks it up
+     * Called from OrderService.confirmDelivery() after OTP validated.
+     * Automatically pays out delivery fee to deliverer's UPI.
      */
     @Transactional
     public void initiatePayout(Order order, User deliverer) {
         attemptPayout(order, deliverer, 1);
     }
 
-    /**
-     * Core payout attempt logic — used by both initiatePayout() and the retry scheduler.
-     * Increments attemptCount on each call.
-     * After MAX_RETRY_ATTEMPTS failures → marks order payment as FAILED.
-     */
     @Transactional
     public void attemptPayout(Order order, User deliverer, int attemptNumber) {
         try {
-            // Warn in logs if deliverer has no UPI ID — payout will be mocked regardless
-            if (deliverer.getUpiId() == null || deliverer.getUpiId().isBlank()) {
-                System.out.println("[PaymentService] WARNING: Deliverer " +
-                        deliverer.getId() + " has no UPI ID. Payout mocked.");
-            }
-
             String upiId = deliverer.getUpiId() != null
-                    ? deliverer.getUpiId()
-                    : "mock@upi";
+                    ? deliverer.getUpiId() : "mock@upi";
 
-            // Call gateway to send payout to deliverer
             String gatewayRef = gatewayService.sendPayout(upiId, order.getDeliveryFee());
 
-            // Record successful payout
             Payment payment = Payment.builder()
                     .order(order)
-                    .payer(deliverer)   // CampusCarry paying out — using deliverer as placeholder
+                    .payer(deliverer)
                     .payee(deliverer)
                     .type(PaymentType.PAYOUT)
                     .status(PaymentTransactionStatus.SUCCESS)
@@ -117,15 +91,10 @@ public class PaymentService {
 
             paymentRepository.save(payment);
 
-            // Mark order payment as RELEASED — money sent to deliverer
             order.setPaymentStatus(PaymentStatus.RELEASED);
             orderRepository.save(order);
 
-            System.out.println("[PaymentService] Payout successful for order "
-                    + order.getOrderNumber() + " on attempt " + attemptNumber);
-
         } catch (Exception e) {
-            // Payout attempt failed — record it
             Payment failedPayment = Payment.builder()
                     .order(order)
                     .payer(deliverer)
@@ -140,26 +109,17 @@ public class PaymentService {
             paymentRepository.save(failedPayment);
 
             if (attemptNumber >= MAX_RETRY_ATTEMPTS) {
-                // Exhausted all retries — mark order payment FAILED for admin
                 order.setPaymentStatus(PaymentStatus.FAILED);
                 orderRepository.save(order);
-                System.out.println("[PaymentService] Payout FAILED after " +
-                        MAX_RETRY_ATTEMPTS + " attempts for order " +
-                        order.getOrderNumber() + ". Manual handling required.");
-            } else {
-                System.out.println("[PaymentService] Payout attempt " + attemptNumber +
-                        " failed for order " + order.getOrderNumber() +
-                        ". Will retry. Reason: " + e.getMessage());
             }
         }
     }
 
-    // ── Retry ─────────────────────────────────────────────────────────
+    // ── Retry Failed Payouts ─────────────────────────────────────────
 
     /**
      * Called by PaymentRetryScheduler every 15 minutes.
-     * Finds all FAILED payout records with attemptCount < 3 and retries them.
-     * Each retry increments the attemptCount on a new Payment record.
+     * Retries FAILED payouts with attemptCount < 3.
      */
     @Transactional
     public void retryFailedPayouts() {
@@ -169,28 +129,19 @@ public class PaymentService {
 
         if (failedPayouts.isEmpty()) return;
 
-        System.out.println("[PaymentService] Retrying " + failedPayouts.size()
-                + " failed payouts...");
-
         failedPayouts.forEach(failed -> {
             Order order = failed.getOrder();
             User deliverer = order.getDeliverer();
             int nextAttempt = failed.getAttemptCount() + 1;
 
-            // Only retry DELIVERED orders — don't retry if order somehow not delivered
             if (order.getStatus() == OrderStatus.DELIVERED) {
                 attemptPayout(order, deliverer, nextAttempt);
             }
         });
     }
 
-    // ── Query ─────────────────────────────────────────────────────────
+    // ── Query ────────────────────────────────────────────────────────
 
-    /**
-     * Returns all payment records for a given order.
-     * Used by admin to audit the full payment trail for an order.
-     * Called by: GET /admin/orders/{id}/payments
-     */
     public List<Payment> getPaymentsForOrder(UUID orderId) {
         return paymentRepository.findByOrderIdOrderByCreatedAtAsc(orderId);
     }

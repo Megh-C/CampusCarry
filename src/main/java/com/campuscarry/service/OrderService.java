@@ -84,9 +84,7 @@ public class OrderService {
 
         orderRepository.save(order);
 
-        // Initiate payment collection from requester
-        // Mock for now — real Razorpay call when gateway is integrated
-        paymentService.initiateCollection(order, requester);
+
 
         return mapToOrderResponse(order, requesterId);
     }
@@ -161,6 +159,8 @@ public class OrderService {
         order.setOtp(hashedOtp);
         // OTP valid for 5 hours from now
         order.setOtpExpiresAt(LocalDateTime.now().plusHours(5));
+        // Payment window — requester has 5 mins from acceptance to complete payment
+        order.setPaymentDeadline(LocalDateTime.now().plusMinutes(1));
         orderRepository.save(order);
 
         // Update deliverer's active delivery counts on the User entity
@@ -176,6 +176,10 @@ public class OrderService {
                 order.getOrderNumber(),
                 deliverer.getFullName()
         );
+
+        // Initiate payment collection from requester
+        // Mock for now — real Razorpay call when gateway is integrated
+        paymentService.initiateCollection(order, order.getRequester());
 
         return mapToOrderResponse(order, delivererId);
     }
@@ -201,16 +205,6 @@ public class OrderService {
         if (order.getStatus() != OrderStatus.ACCEPTED) {
             throw new BadRequestException("Order is not in an active delivery state.");
         }
-
-        // Email requester that the deliverer has arrived
-        // Both phone numbers are included in the response for frontend to display
-        emailService.sendArrivalNotificationEmail(
-                order.getRequester().getEmail(),
-                order.getRequester().getFullName(),
-                order.getDeliverer().getFullName(),
-                order.getDeliverer().getPhone(),
-                order.getOrderNumber()
-        );
 
         // Response includes both phone numbers since order is ACCEPTED
         // mapToOrderResponse handles the phone reveal logic
