@@ -1,13 +1,11 @@
 package com.campuscarry.controller;
 
 import com.campuscarry.auth.AuthService;
-import com.campuscarry.dto.request.CompleteSignupRequestDto;
-import com.campuscarry.dto.request.InitiateSignupRequestDto;
-import com.campuscarry.dto.request.LoginRequestDto;
-import com.campuscarry.dto.request.VerifyOtpRequestDto;
+import com.campuscarry.dto.request.*;
 import com.campuscarry.dto.response.AuthResponseDto;
 import com.campuscarry.dto.response.MessageResponseDto;
 import com.campuscarry.dto.response.ApiResponseDto;
+import com.campuscarry.service.ForgotPasswordService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final ForgotPasswordService forgotPasswordService;
 
     // POST /api/v1/auth/signup/initiate
     @PostMapping("/signup/initiate")
@@ -54,5 +53,25 @@ public class AuthController {
 
         AuthResponseDto response = authService.login(request);
         return ResponseEntity.ok(ApiResponseDto.success("Login successful", response));
+    }
+
+    // POST /api/v1/auth/forgot-password
+// Step 1 — sends OTP to registered email. Public endpoint, no JWT needed.
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponseDto<MessageResponseDto>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequestDto request) {
+
+        MessageResponseDto response = forgotPasswordService.sendResetOtp(request);
+        return ResponseEntity.ok(ApiResponseDto.success("Request processed.", response));
+    }
+
+    // POST /api/v1/auth/reset-password
+// Step 2 — validates OTP and resets password. Public endpoint, no JWT needed.
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponseDto<MessageResponseDto>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequestDto request) {
+
+        MessageResponseDto response = forgotPasswordService.resetPassword(request);
+        return ResponseEntity.ok(ApiResponseDto.success("Password reset successful.", response));
     }
 }

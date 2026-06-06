@@ -89,6 +89,26 @@ public class EmailService {
                     + toEmail + ": " + e.getMessage());
         }
     }
+
+    // ── Password Reset OTP Email ─────────────────────────────────────
+// Sent when student requests forgot password OTP
+    @Async
+    public void sendPasswordResetOtpEmail(String toEmail, String fullName, String rawOtp) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail, "CampusCarry");
+            helper.setTo(toEmail);
+            helper.setSubject("CampusCarry — Password Reset OTP");
+            helper.setText(buildPasswordResetBody(fullName, rawOtp), true);
+
+            mailSender.send(message);
+        } catch (Exception e) {
+            System.err.println("[EmailService] Failed to send password reset OTP to "
+                    + toEmail + ": " + e.getMessage());
+        }
+    }
     // ── Email Templates ──────────────────────────────────────────────
 
     private String buildSignupOtpEmailBody(String otp) {
@@ -172,5 +192,30 @@ public class EmailService {
                     </p>
                 </div>
                 """.formatted(requesterName, delivererName, orderNumber, delivererPhone);
+    }
+
+    private String buildPasswordResetBody(String fullName, String otp) {
+        return """
+            <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto;
+                        padding: 32px; border: 1px solid #e0e0e0; border-radius: 8px;">
+                <h2 style="color: #2d2d2d;">Password Reset Request</h2>
+                <p style="color: #555; font-size: 15px;">
+                    Hi <strong>%s</strong>, use the OTP below to reset your password.
+                    Valid for <strong>10 minutes</strong>.
+                </p>
+                <div style="text-align: center; margin: 32px 0;">
+                    <span style="font-size: 36px; font-weight: bold;
+                                 letter-spacing: 8px; color: #1a1a1a;">%s</span>
+                </div>
+                <p style="color: #e57373; font-size: 13px;">
+                    ⚠️ If you did not request this, please ignore this email.
+                    Your password will not change.
+                </p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
+                <p style="color: #bbb; font-size: 12px; text-align: center;">
+                    CampusCarry — by students, for students
+                </p>
+            </div>
+            """.formatted(fullName, otp);
     }
 }
