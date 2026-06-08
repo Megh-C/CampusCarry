@@ -35,3 +35,10 @@ build/
 # Local config
 src/main/resources/application.properties
 .env
+
+# Claude Code
+.claude/
+
+# Frontend
+campuscarry-frontend/node_modules/
+campuscarry-frontend/dist/
