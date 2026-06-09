@@ -49,6 +49,9 @@ export const adminApi = {
     apiClient.get<never, PageResponse<Order>>('/admin/payments/failed', { params }),
 
   // Locations
+  getLocations: () =>
+    apiClient.get<never, Location[]>('/admin/locations'),
+
   addLocation: (data: { name: string; code: string }) =>
     apiClient.post<never, Location>('/admin/locations', data),
 

@@ -127,6 +127,14 @@ public class AdminController {
 
     // ── Location Management ──────────────────────────────────────────
 
+    // GET /api/v1/admin/locations — all locations including inactive
+    @GetMapping("/locations")
+    public ResponseEntity<ApiResponseDto<List<LocationResponseDto>>> getAllLocations() {
+        List<LocationResponseDto> locations = adminService.getAllLocations();
+        return ResponseEntity.ok(ApiResponseDto.success("Locations loaded", locations));
+    }
+
+
     //WORKING
     // POST /api/v1/admin/locations
     // Add a new pickup location. After adding, set pricing via PATCH /admin/pricing/{id}
@@ -152,7 +160,7 @@ public class AdminController {
     // ── Pricing Management ───────────────────────────────────────────
 
     //WORKING
-    // GET /api/v1/admin/pricing
+    // GET /api/v1/admin/pricingye
     // Full pricing matrix — all location + cluster combinations
     @GetMapping("/pricing")
     public ResponseEntity<ApiResponseDto<List<PricingResponseDto>>> getFullPricingMatrix() {

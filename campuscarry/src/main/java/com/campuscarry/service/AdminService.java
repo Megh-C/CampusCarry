@@ -151,11 +151,7 @@ public class AdminService {
 
         locationRepository.save(location);
 
-        return LocationResponseDto.builder()
-                .id(location.getId())
-                .name(location.getName())
-                .code(location.getCode())
-                .build();
+        return mapToLocationDto(location);
     }
 
     /**
@@ -172,11 +168,18 @@ public class AdminService {
         location.setActive(!location.isActive());
         locationRepository.save(location);
 
-        return LocationResponseDto.builder()
-                .id(location.getId())
-                .name(location.getName())
-                .code(location.getCode())
-                .build();
+        return mapToLocationDto(location);
+    }
+
+    /**
+     * Called by: GET /admin/locations
+     * Returns ALL locations (active and inactive) for the admin panel.
+     */
+    public List<LocationResponseDto> getAllLocations() {
+        return locationRepository.findAll()
+                .stream()
+                .map(this::mapToLocationDto)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -313,6 +316,15 @@ public class AdminService {
                 .deliveredAt(order.getDeliveredAt())
                 .isRated(order.isRated())
                 .isRatingSkipped(order.isRatingSkipped())
+                .build();
+    }
+
+    private LocationResponseDto mapToLocationDto(Location location) {
+        return LocationResponseDto.builder()
+                .id(location.getId())
+                .name(location.getName())
+                .code(location.getCode())
+                .active(location.isActive())
                 .build();
     }
 

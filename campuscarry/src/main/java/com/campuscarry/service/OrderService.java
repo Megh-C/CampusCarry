@@ -14,6 +14,7 @@ import com.campuscarry.exception.ResourceNotFoundException;
 import com.campuscarry.payment.PaymentService;
 import com.campuscarry.repository.LocationRepository;
 import com.campuscarry.repository.OrderRepository;
+import com.campuscarry.repository.RatingRepository;
 import com.campuscarry.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,6 +37,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final LocationRepository locationRepository;
+    private final RatingRepository ratingRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final PricingService pricingService;
@@ -158,8 +160,8 @@ public class OrderService {
 
     // ── Notify Arrival ───────────────────────────────────────────────
     // POST /orders/{id}/notify
-    // Deliverer presses "I'm Here" — no email, no WebSocket event.
-    // Frontend shows arrival UI using the response data.
+    // Deliverer presses "I'm Here" — no email.
+    // Broadcasts WebSocket event so orderer's UI updates in real time.
     // Phone numbers already visible since order is ACCEPTED.
 
     // Called by GET /orders/feed for initial page load
@@ -185,6 +187,7 @@ public class OrderService {
             throw new BadRequestException("Order is not in an active delivery state.");
         }
 
+        webSocketService.broadcastOrderArrived(orderId);
         return mapToOrderResponse(order, delivererId);
     }
 
@@ -371,6 +374,11 @@ public class OrderService {
                 // Rating flags — frontend uses these to show/hide rating prompt
                 .isRated(order.isRated())
                 .isRatingSkipped(order.isRatingSkipped())
+                .ratingStars(order.isRated()
+                        ? ratingRepository.findByOrderId(order.getId())
+                                .map(r -> r.getStars())
+                                .orElse(null)
+                        : null)
                 .build();
     }
 

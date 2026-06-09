@@ -14,4 +14,5 @@ public class LocationResponseDto {
     private UUID id;
     private String name;
     private String code;
+    private boolean active;
 }

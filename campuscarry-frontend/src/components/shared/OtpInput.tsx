@@ -1,5 +1,4 @@
-import { useRef, type KeyboardEvent, type ClipboardEvent } from 'react'
-import { cn } from '@/lib/utils'
+import { useRef } from 'react'
 
 interface Props {
   value: string
@@ -8,70 +7,56 @@ interface Props {
   disabled?: boolean
 }
 
-export default function OtpInput({ value, onChange, length = 6, disabled }: Props) {
+export default function OtpInput({ value, onChange, length = 6, disabled = false }: Props) {
   const inputs = useRef<(HTMLInputElement | null)[]>([])
 
-  const digits = value.split('').concat(Array(length).fill('')).slice(0, length)
-
-  const focus = (i: number) => {
-    inputs.current[i]?.focus()
-    inputs.current[i]?.select()
+  const handleChange = (i: number, raw: string) => {
+    const digit = raw.replace(/\D/g, '').slice(-1)
+    const chars = value.padEnd(length, '').split('')
+    chars[i] = digit
+    onChange(chars.join('').slice(0, length))
+    if (digit && i < length - 1) inputs.current[i + 1]?.focus()
   }
 
-  const handleChange = (i: number, char: string) => {
-    const digit = char.replace(/\D/g, '').slice(-1)
-    const next = digits.map((d, idx) => (idx === i ? digit : d))
-    onChange(next.join(''))
-    if (digit && i < length - 1) focus(i + 1)
-  }
-
-  const handleKey = (i: number, e: KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (i: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace') {
-      if (digits[i]) {
-        const next = digits.map((d, idx) => (idx === i ? '' : d))
-        onChange(next.join(''))
+      if (value[i]) {
+        const chars = value.padEnd(length, '').split('')
+        chars[i] = ''
+        onChange(chars.join(''))
       } else if (i > 0) {
-        focus(i - 1)
-        const next = digits.map((d, idx) => (idx === i - 1 ? '' : d))
-        onChange(next.join(''))
+        inputs.current[i - 1]?.focus()
       }
     } else if (e.key === 'ArrowLeft' && i > 0) {
-      focus(i - 1)
+      inputs.current[i - 1]?.focus()
     } else if (e.key === 'ArrowRight' && i < length - 1) {
-      focus(i + 1)
+      inputs.current[i + 1]?.focus()
     }
   }
 
-  const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
+  const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault()
     const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, length)
     onChange(pasted.padEnd(length, '').slice(0, length))
-    focus(Math.min(pasted.length, length - 1))
+    inputs.current[Math.min(pasted.length, length - 1)]?.focus()
   }
 
   return (
     <div className="flex gap-2 justify-center">
-      {digits.map((digit, i) => (
+      {Array.from({ length }, (_, i) => (
         <input
           key={i}
-          ref={(el) => { inputs.current[i] = el }}
+          ref={el => { inputs.current[i] = el }}
           type="text"
           inputMode="numeric"
           maxLength={1}
-          value={digit}
+          value={value[i] ?? ''}
           disabled={disabled}
-          onChange={(e) => handleChange(i, e.target.value)}
-          onKeyDown={(e) => handleKey(i, e)}
+          onChange={e => handleChange(i, e.target.value)}
+          onKeyDown={e => handleKeyDown(i, e)}
           onPaste={handlePaste}
-          onFocus={(e) => e.target.select()}
-          className={cn(
-            'w-11 h-12 text-center text-lg font-semibold rounded-xl border bg-gray-50',
-            'transition-all outline-none',
-            'border-gray-200 text-gray-900',
-            'focus:border-primary focus:ring-2 focus:ring-primary/20 focus:bg-white',
-            digit ? 'border-primary/40 bg-white' : '',
-            disabled ? 'opacity-50 cursor-not-allowed' : ''
-          )}
+          onFocus={e => e.target.select()}
+          className="w-11 h-14 rounded-xl border-2 border-gray-200 bg-gray-50 text-center text-xl font-bold font-mono text-gray-900 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/15 focus:bg-white disabled:opacity-50"
         />
       ))}
     </div>

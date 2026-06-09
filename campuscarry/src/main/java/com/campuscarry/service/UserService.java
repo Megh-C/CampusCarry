@@ -128,6 +128,9 @@ public class UserService {
                 .rating(user.getRating())
                 .totalDeliveries(user.getTotalDeliveries())
                 .isOnDelivery(user.isOnDelivery())
+                .activeSmall(user.getActiveSmall())
+                .activeMedium(user.getActiveMedium())
+                .activeLarge(user.getActiveLarge())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

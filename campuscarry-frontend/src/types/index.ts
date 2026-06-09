@@ -96,6 +96,7 @@ export interface Order {
   deliveredAt?: string
   isRated: boolean
   isRatingSkipped: boolean
+  ratingStars?: number
 }
 
 export interface OrderFeedItem {
@@ -117,6 +118,7 @@ export interface Location {
   id: string
   name: string
   code: string
+  active?: boolean
 }
 
 export interface FeeEstimate {
@@ -124,7 +126,7 @@ export interface FeeEstimate {
   pickupLocationName: string
   dropHostelBlock: string
   size: OrderSize
-  deliveryFee: number
+  estimatedFee: number
 }
 
 // ── Rating ────────────────────────────────────────────────────────────────────

@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
 @EnableJpaAuditing
-public class CampuscarryApplication {
+public class    CampuscarryApplication {
 
 	public static void main(String[] args) {
 

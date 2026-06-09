@@ -4,6 +4,7 @@ import com.campuscarry.entity.enums.Gender;
 import com.campuscarry.entity.enums.Role;
 import com.campuscarry.entity.enums.UserStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,6 +31,7 @@ public class AdminUserResponseDto {
     private UserStatus status;
     private Double rating;
     private Integer totalDeliveries;
+    @JsonProperty("isOnDelivery")
     private boolean isOnDelivery;
     private Integer activeSmall;
     private Integer activeMedium;

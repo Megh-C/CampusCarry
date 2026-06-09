@@ -5,10 +5,8 @@ import toast from 'react-hot-toast'
 import AuthLayout from '@/layouts/AuthLayout'
 import { authApi } from '@/api/auth'
 
-const HOSTEL_BLOCKS = [
-  'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-  'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-]
+const MH_BLOCKS = ['A_MH', 'B_MH', 'C_MH', 'D_MH', 'E_MH', 'F_MH', 'G_MH', 'H_MH', 'J_MH', 'K_MH', 'L_MH', 'M_MH', 'N_MH', 'P_MH', 'Q_MH', 'R_MH', 'S_MH', 'T_MH']
+const LH_BLOCKS = ['A_LH', 'B_LH', 'C_LH', 'D_LH', 'E_LH', 'F_LH', 'G_LH', 'H_LH', 'J_LH']
 
 const inputCls =
   'w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/15 focus:bg-white disabled:opacity-60'
@@ -42,8 +40,17 @@ export default function SignupCompletePage() {
     return null
   }
 
+  const hostelBlockOptions =
+    form.gender === 'MALE' ? MH_BLOCKS :
+    form.gender === 'FEMALE' ? LH_BLOCKS :
+    [...MH_BLOCKS, ...LH_BLOCKS]
+
   const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-    setForm((f) => ({ ...f, [key]: e.target.value }))
+    setForm((f) => ({
+      ...f,
+      [key]: e.target.value,
+      ...(key === 'gender' ? { hostelBlock: '' } : {}),
+    }))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -168,12 +175,12 @@ export default function SignupCompletePage() {
           <select
             value={form.hostelBlock}
             onChange={set('hostelBlock')}
-            disabled={loading}
+            disabled={loading || !form.gender}
             className={selectCls}
           >
-            <option value="">Select block</option>
-            {HOSTEL_BLOCKS.map((b) => (
-              <option key={b} value={b}>Block {b}</option>
+            <option value="">{form.gender ? 'Select block' : 'Select gender first'}</option>
+            {hostelBlockOptions.map((b) => (
+              <option key={b} value={b}>{b.replace('_', ' ')}</option>
             ))}
           </select>
         </div>

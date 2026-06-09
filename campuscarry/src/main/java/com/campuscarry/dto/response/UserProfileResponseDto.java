@@ -32,5 +32,8 @@ public class UserProfileResponseDto {
     private Double rating;
     private Integer totalDeliveries;
     private boolean isOnDelivery;
+    private Integer activeSmall;
+    private Integer activeMedium;
+    private Integer activeLarge;
     private LocalDateTime createdAt;
 }

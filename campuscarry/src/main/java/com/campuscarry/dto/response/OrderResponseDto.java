@@ -4,6 +4,7 @@ import com.campuscarry.entity.enums.OrderSize;
 import com.campuscarry.entity.enums.OrderStatus;
 import com.campuscarry.entity.enums.PaymentStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -54,7 +55,14 @@ public class OrderResponseDto {
     private LocalDateTime acceptedAt;
     private LocalDateTime deliveredAt;
 
-    // Rating flags — frontend uses these to decide what to show after delivery
+    // Rating flags — @JsonProperty forces the JSON key to stay "isRated"/"isRatingSkipped"
+    // Without it, Lombok's isRated() getter causes Jackson to serialize as "rated"/"ratingSkipped"
+    @JsonProperty("isRated")
     private boolean isRated;
+
+    @JsonProperty("isRatingSkipped")
     private boolean isRatingSkipped;
+
+    // Stars given (1–5) — only present when isRated is true
+    private Integer ratingStars;
 }

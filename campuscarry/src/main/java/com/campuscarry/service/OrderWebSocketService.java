@@ -45,4 +45,8 @@ public class OrderWebSocketService {
     public void broadcastOrderRemoved(UUID orderId) {
         messagingTemplate.convertAndSend("/topic/orders/removed", orderId.toString());
     }
+
+    public void broadcastOrderArrived(UUID orderId) {
+        messagingTemplate.convertAndSend("/topic/orders/" + orderId + "/arrived", "");
+    }
 }
