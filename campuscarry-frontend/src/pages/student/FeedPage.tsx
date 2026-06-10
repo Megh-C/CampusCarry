@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Loader2, PackageOpen, X, ChevronUp, Phone, CheckCircle, Star } from 'lucide-react'
+import { Loader2, PackageOpen, X, ChevronUp, Phone, CheckCircle, Star } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
@@ -8,7 +8,13 @@ import TopBar from '@/components/shared/TopBar'
 import SlideToAction from '@/components/shared/SlideToAction'
 import OtpInput from '@/components/shared/OtpInput'
 import { ordersApi } from '@/api/orders'
+import { useAuth } from '@/context/AuthContext'
 import type { OrderFeedItem, Order } from '@/types'
+
+const AVATAR_COLORS = ['bg-violet-500','bg-blue-500','bg-emerald-500','bg-orange-500','bg-pink-500']
+function avatarColor(name: string) {
+  return AVATAR_COLORS[(name.charCodeAt(0) ?? 0) % AVATAR_COLORS.length]
+}
 
 const WS_URL = 'http://localhost:8080/api/v1/ws'
 
@@ -27,6 +33,10 @@ function timeLeft(expiresAt: string): string {
 
 export default function FeedPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const initials = user?.fullName
+    ? user.fullName.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()
+    : '?'
 
   // ── Feed ────────────────────────────────────────────────────────────────
   const [orders, setOrders]       = useState<OrderFeedItem[]>([])
@@ -240,11 +250,11 @@ export default function FeedPage() {
       <TopBar
         right={
           <button
-            onClick={() => navigate('/orders/new')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors"
+            onClick={() => navigate('/profile')}
+            className={`w-8 h-8 rounded-full ${avatarColor(user?.fullName ?? '')} flex items-center justify-center hover:opacity-90 active:scale-95 transition-all`}
+            aria-label="Profile"
           >
-            <Plus className="w-3.5 h-3.5" />
-            Place Order
+            <span className="text-white text-xs font-bold">{initials}</span>
           </button>
         }
       />

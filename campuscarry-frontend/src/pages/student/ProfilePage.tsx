@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Eye, EyeOff, Loader2, Star, Pencil, X, CheckCircle } from 'lucide-react'
+import { Eye, EyeOff, Loader2, Star, Pencil, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import TopBar from '@/components/shared/TopBar'
 import { usersApi } from '@/api/users'
-import { useAuth } from '@/context/AuthContext'
 import type { UserProfile } from '@/types'
 
 const MH_BLOCKS = ['A_MH','B_MH','C_MH','D_MH','E_MH','F_MH','G_MH','H_MH','J_MH','K_MH','L_MH','M_MH','N_MH','P_MH','Q_MH','R_MH','S_MH','T_MH']
@@ -33,7 +32,6 @@ function StarRating({ value }: { value: number }) {
 }
 
 export default function ProfilePage() {
-  const { user } = useAuth()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -113,7 +111,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <>
-        <TopBar title="Profile" showBack showLogout />
+        <TopBar title="Profile" showBack />
         <div className="flex justify-center py-24"><Loader2 className="w-6 h-6 animate-spin text-gray-300" /></div>
       </>
     )
@@ -125,7 +123,7 @@ export default function ProfilePage() {
 
   return (
     <>
-      <TopBar title="Profile" showBack showLogout />
+      <TopBar title="Profile" showBack />
 
       <div className="px-4 pt-4 pb-24 max-w-lg mx-auto space-y-4">
 

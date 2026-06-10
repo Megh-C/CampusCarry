@@ -93,7 +93,7 @@ export default function MyOrdersPage() {
       <TopBar title="My Orders" showBack />
 
       {/* Tab switcher */}
-      <div className="px-4 pt-4 max-w-lg mx-auto">
+      <div className="px-4 pt-6 max-w-lg mx-auto">
         <div className="flex bg-gray-100 rounded-xl p-1 mb-4">
           {(['requester', 'deliverer'] as Tab[]).map(t => (
             <button
@@ -107,7 +107,7 @@ export default function MyOrdersPage() {
         </div>
       </div>
 
-      <div className="px-4 pb-24 max-w-lg mx-auto">
+      <div className="px-4 pb-28 max-w-lg mx-auto">
         {loading ? (
           <div className="flex justify-center py-16">
             <Loader2 className="w-6 h-6 animate-spin text-gray-300" />

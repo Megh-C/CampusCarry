@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Loader2, Star, Phone, User, MapPin, CreditCard, Clock } from 'lucide-react'
+import { ArrowLeft, Loader2, Star, Phone, User, MapPin, Clock } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { adminApi } from '@/api/admin'
 import type { Order, OrderStatus, PaymentStatus } from '@/types'
@@ -20,14 +20,6 @@ const PAY_STYLE: Record<PaymentStatus, string> = {
   FAILED:   'bg-red-50 text-red-500',
 }
 
-function InfoRow({ label, value }: { label: string; value: string | number | null | undefined }) {
-  return (
-    <div className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
-      <span className="text-xs text-gray-400">{label}</span>
-      <span className="text-sm font-medium text-gray-700">{value ?? '—'}</span>
-    </div>
-  )
-}
 
 function formatDateTime(iso: string | null | undefined) {
   if (!iso) return '—'

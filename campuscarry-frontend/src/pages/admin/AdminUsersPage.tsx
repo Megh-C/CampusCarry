@@ -42,7 +42,7 @@ export default function AdminUsersPage() {
   const [changingId, setChangingId] = useState<string | null>(null)
   const [savingId, setSavingId]     = useState<string | null>(null)
 
-  const searchTimeout = useRef<ReturnType<typeof setTimeout>>()
+  const searchTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const load = useCallback(async (p: number) => {
     setLoading(true)

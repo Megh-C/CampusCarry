@@ -47,7 +47,7 @@ export default function CreateOrderPage() {
 
     setEstimating(true)
     ordersApi.getEstimate({ pickupLocationId: pickupId, dropHostelBlock: dropBlock, size })
-      .then(setEstimate)
+      .then(res => setEstimate(res.data))
       .catch(() => toast.error('Could not fetch fee estimate.'))
       .finally(() => setEstimating(false))
   }, [pickupId, dropBlock, size])

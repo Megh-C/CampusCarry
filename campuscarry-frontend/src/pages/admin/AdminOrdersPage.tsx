@@ -46,7 +46,7 @@ export default function AdminOrdersPage() {
   const [sortBy, setSortBy]               = useState('createdAt')
   const [sortDir, setSortDir]             = useState<'asc' | 'desc'>('desc')
 
-  const searchTimeout = useRef<ReturnType<typeof setTimeout>>()
+  const searchTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const load = useCallback(async (p: number) => {
     setLoading(true)

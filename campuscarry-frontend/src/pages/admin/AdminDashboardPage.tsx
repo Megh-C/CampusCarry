@@ -185,7 +185,7 @@ export default function AdminDashboardPage() {
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(v: number) => [v, 'Orders']}
+                      formatter={(v) => [v ?? 0, 'Orders']}
                       contentStyle={{ borderRadius: 10, border: '1px solid #f3f4f6', fontSize: 12 }}
                     />
                     <Legend
@@ -211,7 +211,7 @@ export default function AdminDashboardPage() {
                   <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#6b7280' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 12, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
                   <Tooltip
-                    formatter={(v: number) => [v, 'Users']}
+                    formatter={(v) => [v ?? 0, 'Users']}
                     contentStyle={{ borderRadius: 10, border: '1px solid #f3f4f6', fontSize: 12 }}
                   />
                   <Bar dataKey="value" radius={[8, 8, 0, 0]}>
