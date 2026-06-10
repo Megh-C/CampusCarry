@@ -485,8 +485,8 @@ Shows platform-wide stats filtered by date range:
 2. **Pricing Matrix** — 72 rows covering all cluster × location combinations
 
 3. **Admin User**
-   - Email: `admin@campuscarry.com`
-   - Password: `Admin@1234`
-   - *(Change this in production)*
+   - Email: 
+   - Password: 
+  was seeded for testing removed from the database and the seed code in production
 
 After initial seeding, admin can update prices via the Admin Pricing page. Restarting the backend will not overwrite prices that have already been edited, because the seeder only inserts rows that don't exist yet.
