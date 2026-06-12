@@ -23,19 +23,22 @@ export default function BottomNav() {
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     cn(
-      'flex flex-col items-center gap-0.5 px-4 py-2 rounded-xl transition-colors min-w-[56px]',
-      isActive ? 'text-primary' : 'text-gray-400 hover:text-gray-600'
+      'relative flex flex-col items-center gap-0.5 px-4 py-2 rounded-xl transition-colors min-w-[56px]',
+      isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
     )
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 shadow-[0_-2px_12px_rgba(0,0,0,0.06)]">
-      <div className="max-w-lg mx-auto flex items-center justify-around px-2 h-16 relative">
+    <nav className="fixed bottom-3 left-3 right-3 z-50">
+      <div className="max-w-lg mx-auto flex items-center justify-around px-2 h-16 relative rounded-3xl border border-border bg-card/90 backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.45)]">
 
         {/* Left two items */}
         {leftItems.map(({ to, icon: Icon, label, end }) => (
           <NavLink key={to} to={to} end={end} className={navLinkClass}>
             {({ isActive }) => (
               <>
+                {isActive && (
+                  <span className="absolute -top-px left-1/2 -translate-x-1/2 w-6 h-1 rounded-full bg-primary" />
+                )}
                 <Icon className={cn('w-5 h-5', isActive ? 'stroke-[2.5px]' : '')} />
                 <span className="text-[10px] font-medium">{label}</span>
               </>
@@ -44,10 +47,10 @@ export default function BottomNav() {
         ))}
 
         {/* Centre FAB — create order */}
-        <div className="flex items-center justify-center relative -top-4">
+        <div className="flex items-center justify-center relative -top-5">
           <button
             onClick={() => navigate('/orders/new')}
-            className="w-14 h-14 rounded-full bg-primary text-white shadow-lg shadow-primary/30 flex items-center justify-center hover:bg-primary/90 active:scale-95 transition-all"
+            className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-orange-600 text-white shadow-lg shadow-primary/40 flex items-center justify-center hover:brightness-105 active:scale-95 transition-all ring-4 ring-background"
             aria-label="Place new order"
           >
             <Plus className="w-7 h-7 stroke-[2.5px]" />
@@ -59,6 +62,9 @@ export default function BottomNav() {
           <NavLink key={to} to={to} className={navLinkClass}>
             {({ isActive }) => (
               <>
+                {isActive && (
+                  <span className="absolute -top-px left-1/2 -translate-x-1/2 w-6 h-1 rounded-full bg-primary" />
+                )}
                 <Icon className={cn('w-5 h-5', isActive ? 'stroke-[2.5px]' : '')} />
                 <span className="text-[10px] font-medium">{label}</span>
               </>
@@ -69,7 +75,7 @@ export default function BottomNav() {
         {/* Logout */}
         <button
           onClick={handleLogout}
-          className="flex flex-col items-center gap-0.5 px-4 py-2 rounded-xl transition-colors min-w-[56px] text-gray-400 hover:text-red-500 active:text-red-500"
+          className="flex flex-col items-center gap-0.5 px-4 py-2 rounded-xl transition-colors min-w-[56px] text-muted-foreground hover:text-destructive active:text-destructive"
         >
           <LogOut className="w-5 h-5" />
           <span className="text-[10px] font-medium">Logout</span>

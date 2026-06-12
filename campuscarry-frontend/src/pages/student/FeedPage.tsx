@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Loader2, PackageOpen, X, ChevronUp, Phone, CheckCircle, Star } from 'lucide-react'
+import { Loader2, PackageOpen, X, ChevronUp, Phone, CheckCircle, Star, MapPin, Navigation } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
@@ -19,9 +19,9 @@ function avatarColor(name: string) {
 const WS_URL = 'http://localhost:8080/api/v1/ws'
 
 const SIZE_STYLE: Record<string, string> = {
-  SMALL:  'bg-blue-50 text-blue-600',
-  MEDIUM: 'bg-amber-50 text-amber-600',
-  LARGE:  'bg-red-50 text-red-600',
+  SMALL:  'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+  MEDIUM: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+  LARGE:  'bg-red-500/10 text-red-600 dark:text-red-400',
 }
 
 function timeLeft(expiresAt: string): string {
@@ -251,7 +251,7 @@ export default function FeedPage() {
         right={
           <button
             onClick={() => navigate('/profile')}
-            className={`w-8 h-8 rounded-full ${avatarColor(user?.fullName ?? '')} flex items-center justify-center hover:opacity-90 active:scale-95 transition-all`}
+            className={`w-8 h-8 rounded-full ${avatarColor(user?.fullName ?? '')} flex items-center justify-center hover:opacity-90 active:scale-95 transition-all ring-2 ring-background shadow-sm`}
             aria-label="Profile"
           >
             <span className="text-white text-xs font-bold">{initials}</span>
@@ -261,25 +261,31 @@ export default function FeedPage() {
 
       <div className="px-4 pt-4 pb-24 max-w-lg mx-auto">
         <div className="mb-5">
-          <h1 className="text-2xl font-bold text-gray-900">Live Feed</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Orders waiting for a deliverer</p>
+          <h1 className="text-2xl font-extrabold text-foreground tracking-tight">Live Feed</h1>
+          <p className="text-sm text-muted-foreground mt-0.5 flex items-center gap-1.5">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+            Orders waiting for a deliverer
+          </p>
         </div>
 
         {/* ── Active order banner ── */}
         {activeOrder && activeOrder.status === 'ACCEPTED' && (
           <button
             onClick={() => setSheetOpen(true)}
-            className="w-full text-left bg-orange-50 border border-orange-200 rounded-2xl p-4 mb-5 active:scale-[0.99] transition-all"
+            className="w-full text-left bg-gradient-to-r from-primary/15 to-orange-500/10 border border-primary/25 rounded-2xl p-4 mb-5 active:scale-[0.99] transition-all"
           >
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-xs text-orange-500 font-semibold uppercase tracking-wide">
+                <p className="text-xs text-primary font-bold uppercase tracking-wide">
                   {activeRole === 'deliverer' ? 'Active Delivery' : 'Your Order'}
                 </p>
-                <p className="text-sm font-bold text-gray-900 mt-0.5 truncate">
+                <p className="text-sm font-bold text-foreground mt-0.5 truncate">
                   #{activeOrder.orderNumber} · {activeOrder.pickupLocationName} → {activeOrder.dropHostelBlock.replace('_', ' ')}
                 </p>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {activeRole === 'deliverer'
                     ? `Delivering for ${activeOrder.requesterName}`
                     : isArrived
@@ -289,7 +295,7 @@ export default function FeedPage() {
                         : 'Waiting for a deliverer'}
                 </p>
               </div>
-              <ChevronUp className="w-5 h-5 text-orange-400 shrink-0" />
+              <ChevronUp className="w-5 h-5 text-primary shrink-0" />
             </div>
           </button>
         )}
@@ -297,24 +303,33 @@ export default function FeedPage() {
         {/* ── Feed list ── */}
         {loading ? (
           <div className="flex justify-center py-16">
-            <Loader2 className="w-6 h-6 animate-spin text-gray-300" />
+            <Loader2 className="w-6 h-6 animate-spin text-primary/40" />
           </div>
         ) : orders.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <PackageOpen className="w-10 h-10 text-gray-200 mb-3" />
-            <p className="text-sm font-medium text-gray-400">No orders right now</p>
-            <p className="text-xs text-gray-300 mt-1">New orders will appear here instantly</p>
+            <div className="w-16 h-16 rounded-3xl bg-muted flex items-center justify-center mb-4">
+              <PackageOpen className="w-8 h-8 text-muted-foreground/50" />
+            </div>
+            <p className="text-sm font-semibold text-muted-foreground">No orders right now</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">New orders will appear here instantly</p>
           </div>
         ) : (
           <div className="space-y-3">
             {orders.map(order => (
-              <div key={order.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+              <div
+                key={order.id}
+                className="bg-card rounded-2xl border border-border shadow-sm hover:shadow-md hover:border-primary/20 p-4 transition-all"
+              >
                 <div className="flex items-start justify-between gap-2 mb-3">
-                  <div>
-                    <p className="text-xs text-gray-400">#{order.orderNumber} · {order.requesterName}</p>
-                    <p className="text-sm font-semibold text-gray-900 mt-0.5">
-                      {order.pickupLocationName} → {order.dropHostelBlock.replace('_', ' ')}
-                    </p>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">#{order.orderNumber} · {order.requesterName}</p>
+                    <div className="flex items-center gap-1.5 text-sm font-semibold text-foreground mt-1">
+                      <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
+                      <span className="truncate">{order.pickupLocationName}</span>
+                      <span className="text-muted-foreground/50">→</span>
+                      <Navigation className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                      <span className="truncate">{order.dropHostelBlock.replace('_', ' ')}</span>
+                    </div>
                   </div>
                   <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${SIZE_STYLE[order.size]}`}>
                     {order.size}
@@ -322,20 +337,22 @@ export default function FeedPage() {
                 </div>
 
                 {order.description && (
-                  <p className="text-sm text-gray-500 bg-gray-50 rounded-lg px-3 py-2 mb-3 leading-relaxed">
+                  <p className="text-sm text-muted-foreground bg-muted/60 rounded-xl px-3 py-2 mb-3 leading-relaxed">
                     {order.description}
                   </p>
                 )}
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="text-lg font-bold text-gray-900">₹{order.deliveryFee}</span>
-                    <span className="text-xs text-gray-400">{timeLeft(order.expiresAt)}</span>
+                    <span className="text-lg font-extrabold text-foreground">₹{order.deliveryFee}</span>
+                    <span className="text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
+                      {timeLeft(order.expiresAt)}
+                    </span>
                   </div>
                   <button
                     onClick={() => handleAccept(order.id)}
                     disabled={!!accepting}
-                    className="px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center gap-1.5"
+                    className="px-4 py-2 rounded-xl bg-gradient-to-br from-primary to-orange-600 text-white text-sm font-semibold shadow-md shadow-primary/20 hover:brightness-105 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center gap-1.5"
                   >
                     {accepting === order.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                     Deliver
@@ -349,23 +366,23 @@ export default function FeedPage() {
 
       {/* ── Full-screen order sheet ── */}
       {sheetOpen && activeOrder && (
-        <div className="fixed inset-0 z-50 bg-white flex flex-col">
+        <div className="fixed inset-0 z-50 bg-background flex flex-col">
 
           {/* Header */}
-          <div className="flex items-center justify-between px-4 pt-12 pb-4 border-b border-gray-100 shrink-0">
+          <div className="flex items-center justify-between px-4 pt-12 pb-4 border-b border-border shrink-0">
             <div>
-              <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold">
+              <p className="text-xs text-primary uppercase tracking-wide font-bold">
                 {activeRole === 'deliverer' ? 'Active Delivery' : 'Your Order'}
               </p>
-              <h2 className="text-xl font-bold text-gray-900 mt-0.5">
+              <h2 className="text-xl font-extrabold text-foreground mt-0.5">
                 Order #{activeOrder.orderNumber}
               </h2>
             </div>
             <button
               onClick={handleCloseSheet}
-              className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center"
+              className="w-9 h-9 rounded-full bg-muted hover:bg-muted/70 flex items-center justify-center transition-colors"
             >
-              <X className="w-4 h-4 text-gray-500" />
+              <X className="w-4 h-4 text-muted-foreground" />
             </button>
           </div>
 
@@ -376,9 +393,9 @@ export default function FeedPage() {
             {showRating && (
               <div className="flex flex-col items-center py-8 text-center space-y-6">
                 <div>
-                  <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-1">Delivery Complete</p>
-                  <h3 className="text-xl font-bold text-gray-900">Rate your deliverer</h3>
-                  <p className="text-sm text-gray-500 mt-1">{activeOrder.delivererName}</p>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-wide font-bold mb-1">Delivery Complete</p>
+                  <h3 className="text-xl font-extrabold text-foreground">Rate your deliverer</h3>
+                  <p className="text-sm text-muted-foreground mt-1">{activeOrder.delivererName}</p>
                 </div>
 
                 {/* Stars */}
@@ -393,7 +410,7 @@ export default function FeedPage() {
                         className={`w-11 h-11 transition-colors ${
                           star <= selectedStars
                             ? 'text-yellow-400 fill-yellow-400'
-                            : 'text-gray-200 fill-gray-100'
+                            : 'text-muted-foreground/25 fill-muted'
                         }`}
                       />
                     </button>
@@ -401,7 +418,7 @@ export default function FeedPage() {
                 </div>
 
                 {selectedStars > 0 && (
-                  <p className="text-sm font-medium text-gray-600">
+                  <p className="text-sm font-medium text-foreground/80">
                     {['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent!'][selectedStars]}
                   </p>
                 )}
@@ -410,7 +427,7 @@ export default function FeedPage() {
                   <button
                     onClick={handleSubmitRating}
                     disabled={selectedStars === 0 || submittingRating}
-                    className="w-full py-3.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+                    className="w-full py-3.5 rounded-xl bg-gradient-to-br from-primary to-orange-600 text-white text-sm font-semibold shadow-lg shadow-primary/25 hover:brightness-105 active:scale-[0.98] transition-all disabled:opacity-40 flex items-center justify-center gap-2"
                   >
                     {submittingRating && <Loader2 className="w-4 h-4 animate-spin" />}
                     {submittingRating ? 'Submitting...' : 'Submit Rating'}
@@ -418,7 +435,7 @@ export default function FeedPage() {
                   <button
                     onClick={handleSkipRating}
                     disabled={submittingRating}
-                    className="w-full py-2.5 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+                    className="w-full py-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Skip for now
                   </button>
@@ -429,16 +446,16 @@ export default function FeedPage() {
             {/* ── Deliverer delivered state ── */}
             {isDelivered && activeRole === 'deliverer' && (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mb-4">
-                  <CheckCircle className="w-8 h-8 text-green-500" />
+                <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mb-4">
+                  <CheckCircle className="w-8 h-8 text-emerald-500" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">Delivery Complete!</h3>
-                <p className="text-sm text-gray-500 mt-1.5">
+                <h3 className="text-lg font-extrabold text-foreground">Delivery Complete!</h3>
+                <p className="text-sm text-muted-foreground mt-1.5">
                   ₹{activeOrder.deliveryFee} has been released to your account.
                 </p>
                 <button
                   onClick={closeAndReset}
-                  className="mt-6 px-6 py-2.5 rounded-xl bg-gray-100 text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors"
+                  className="mt-6 px-6 py-2.5 rounded-xl bg-muted text-sm font-semibold text-foreground hover:bg-muted/70 transition-colors"
                 >
                   Back to Feed
                 </button>
@@ -449,19 +466,19 @@ export default function FeedPage() {
             {!isDelivered && (
               <>
                 {/* Route */}
-                <div className="bg-gray-50 rounded-2xl p-4">
+                <div className="bg-card border border-border rounded-2xl p-4 shadow-sm">
                   <div className="flex items-center gap-4">
                     <div className="flex flex-col items-center gap-1">
                       <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-                      <div className="w-0.5 h-6 bg-gray-200" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-orange-400" />
+                      <div className="w-0.5 h-6 bg-border" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                     </div>
                     <div className="flex-1 space-y-3">
-                      <p className="text-sm font-semibold text-gray-800 leading-none">{activeOrder.pickupLocationName}</p>
-                      <p className="text-sm font-semibold text-gray-800 leading-none">{activeOrder.dropHostelBlock.replace('_', ' ')}</p>
+                      <p className="text-sm font-semibold text-foreground leading-none">{activeOrder.pickupLocationName}</p>
+                      <p className="text-sm font-semibold text-foreground leading-none">{activeOrder.dropHostelBlock.replace('_', ' ')}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-gray-900">₹{activeOrder.deliveryFee}</p>
+                      <p className="text-2xl font-extrabold text-foreground">₹{activeOrder.deliveryFee}</p>
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${SIZE_STYLE[activeOrder.size]}`}>
                         {activeOrder.size}
                       </span>
@@ -470,22 +487,22 @@ export default function FeedPage() {
                 </div>
 
                 {/* Contact */}
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-                  <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-3">
+                <div className="bg-card rounded-2xl border border-border shadow-sm p-4">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-bold mb-3">
                     {activeRole === 'deliverer' ? 'Requester' : 'Deliverer'}
                   </p>
                   {activeRole === 'deliverer' ? (
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-base font-bold text-gray-900">{activeOrder.requesterName}</p>
+                        <p className="text-base font-bold text-foreground">{activeOrder.requesterName}</p>
                         {activeOrder.requesterPhone && (
-                          <p className="text-sm text-gray-500 mt-0.5">{activeOrder.requesterPhone}</p>
+                          <p className="text-sm text-muted-foreground mt-0.5">{activeOrder.requesterPhone}</p>
                         )}
                       </div>
                       {activeOrder.requesterPhone && (
                         <a href={`tel:${activeOrder.requesterPhone}`}
-                          className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center shrink-0">
-                          <Phone className="w-4 h-4 text-green-600" />
+                          className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                          <Phone className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                         </a>
                       )}
                     </div>
@@ -494,20 +511,20 @@ export default function FeedPage() {
                       {activeOrder.delivererName ? (
                         <>
                           <div>
-                            <p className="text-base font-bold text-gray-900">{activeOrder.delivererName}</p>
+                            <p className="text-base font-bold text-foreground">{activeOrder.delivererName}</p>
                             {activeOrder.delivererPhone && (
-                              <p className="text-sm text-gray-500 mt-0.5">{activeOrder.delivererPhone}</p>
+                              <p className="text-sm text-muted-foreground mt-0.5">{activeOrder.delivererPhone}</p>
                             )}
                           </div>
                           {activeOrder.delivererPhone && (
                             <a href={`tel:${activeOrder.delivererPhone}`}
-                              className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center shrink-0">
-                              <Phone className="w-4 h-4 text-green-600" />
+                              className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                              <Phone className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                             </a>
                           )}
                         </>
                       ) : (
-                        <p className="text-sm text-gray-400">Waiting for a deliverer...</p>
+                        <p className="text-sm text-muted-foreground">Waiting for a deliverer...</p>
                       )}
                     </div>
                   )}
@@ -517,19 +534,19 @@ export default function FeedPage() {
                 {activeRole === 'requester' && (
                   <>
                     {isArrived && (
-                      <div className="bg-green-50 rounded-2xl p-4 border border-green-100 flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                          <CheckCircle className="w-4 h-4 text-green-600" />
+                      <div className="bg-emerald-500/10 rounded-2xl p-4 border border-emerald-500/20 flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-emerald-500/15 flex items-center justify-center shrink-0">
+                          <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-green-800">Your order is here!</p>
-                          <p className="text-xs text-green-600 mt-0.5">Head to your hostel block to collect it.</p>
+                          <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300">Your order is here!</p>
+                          <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">Head to your hostel block to collect it.</p>
                         </div>
                       </div>
                     )}
-                    <div className="bg-amber-50 rounded-2xl p-4 border border-amber-100">
-                      <p className="text-xs text-amber-600 font-semibold uppercase tracking-wide mb-1">Your OTP</p>
-                      <p className="text-sm text-amber-800 leading-relaxed">
+                    <div className="bg-amber-500/10 rounded-2xl p-4 border border-amber-500/20">
+                      <p className="text-xs text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wide mb-1">Your OTP</p>
+                      <p className="text-sm text-amber-700 dark:text-amber-300 leading-relaxed">
                         Your delivery OTP was sent to your email when the order was accepted.
                         Share it with the deliverer when they arrive.
                       </p>
@@ -539,9 +556,9 @@ export default function FeedPage() {
 
                 {/* Description */}
                 {activeOrder.description && (
-                  <div className="bg-gray-50 rounded-2xl p-4">
-                    <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-1">Note</p>
-                    <p className="text-sm text-gray-600 leading-relaxed">{activeOrder.description}</p>
+                  <div className="bg-muted/60 rounded-2xl p-4">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide font-bold mb-1">Note</p>
+                    <p className="text-sm text-foreground/80 leading-relaxed">{activeOrder.description}</p>
                   </div>
                 )}
 
@@ -550,7 +567,7 @@ export default function FeedPage() {
                   <div className="space-y-3 pb-4">
                     {!hasNotified ? (
                       <div>
-                        <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-2">
+                        <p className="text-xs text-muted-foreground uppercase tracking-wide font-bold mb-2">
                           Notify Arrival
                         </p>
                         <SlideToAction
@@ -559,16 +576,16 @@ export default function FeedPage() {
                           onAction={handleNotify}
                           loading={notifying}
                         />
-                        <p className="text-xs text-gray-400 text-center mt-2">
+                        <p className="text-xs text-muted-foreground text-center mt-2">
                           Slide when you arrive at the hostel block
                         </p>
                       </div>
                     ) : (
                       <div>
-                        <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-2">
+                        <p className="text-xs text-muted-foreground uppercase tracking-wide font-bold mb-2">
                           Confirm Delivery
                         </p>
-                        <p className="text-sm text-gray-500 mb-4">
+                        <p className="text-sm text-muted-foreground mb-4">
                           Requester notified. Ask them for the 6-digit OTP from their email.
                         </p>
                         <OtpInput
@@ -579,7 +596,7 @@ export default function FeedPage() {
                         <button
                           onClick={handleConfirmDelivery}
                           disabled={otp.length < 6 || confirming}
-                          className="w-full mt-4 py-3.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+                          className="w-full mt-4 py-3.5 rounded-xl bg-gradient-to-br from-primary to-orange-600 text-white text-sm font-semibold shadow-lg shadow-primary/25 hover:brightness-105 active:scale-[0.98] transition-all disabled:opacity-40 flex items-center justify-center gap-2"
                         >
                           {confirming && <Loader2 className="w-4 h-4 animate-spin" />}
                           {confirming ? 'Verifying...' : 'Confirm Delivery'}

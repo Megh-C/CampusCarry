@@ -67,46 +67,46 @@ export default function AdminPricingPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-bold text-gray-900">Pricing Matrix</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
+        <h1 className="text-xl font-extrabold text-foreground tracking-tight">Pricing Matrix</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">
           Location × cluster base prices · click the pencil to edit
         </p>
       </div>
 
-      <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 text-xs text-amber-700 font-medium">
+      <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3 text-xs text-amber-700 dark:text-amber-400 font-medium">
         Base price is per SMALL order. Medium = base + ₹7, Large = base + ₹15. Changes apply to new orders only.
       </div>
 
       {loading ? (
         <div className="flex justify-center py-16">
-          <Loader2 className="w-6 h-6 animate-spin text-gray-200" />
+          <Loader2 className="w-6 h-6 animate-spin text-primary/40" />
         </div>
       ) : Object.keys(grouped).length === 0 ? (
-        <div className="py-16 text-center text-sm text-gray-400 font-medium">No pricing data</div>
+        <div className="py-16 text-center text-sm text-muted-foreground font-medium">No pricing data</div>
       ) : (
         <div className="space-y-4">
           {Object.values(grouped).map(({ locationName, rows }) => (
-            <div key={locationName} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-              <div className="px-5 py-3.5 border-b border-gray-100 bg-gray-50/60">
-                <h2 className="text-sm font-bold text-gray-800">{locationName}</h2>
+            <div key={locationName} className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
+              <div className="px-5 py-3.5 border-b border-border bg-muted/40">
+                <h2 className="text-sm font-bold text-foreground">{locationName}</h2>
               </div>
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-50">
-                    <th className="text-left px-5 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Cluster</th>
-                    <th className="text-right px-5 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Small (base)</th>
-                    <th className="text-right px-5 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Medium (+₹7)</th>
-                    <th className="text-right px-5 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Large (+₹15)</th>
+                  <tr className="border-b border-border/60">
+                    <th className="text-left px-5 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Cluster</th>
+                    <th className="text-right px-5 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Small (base)</th>
+                    <th className="text-right px-5 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Medium (+₹7)</th>
+                    <th className="text-right px-5 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Large (+₹15)</th>
                     <th className="w-20 px-5 py-2.5"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-border/60">
                   {rows.map(p => {
                     const base = Number(p.basePrice)
                     const isEditing = editId === p.id
                     return (
-                      <tr key={p.id} className="hover:bg-gray-50/40 transition-colors">
-                        <td className="px-5 py-3 font-medium text-gray-700">
+                      <tr key={p.id} className="hover:bg-muted/30 transition-colors">
+                        <td className="px-5 py-3 font-medium text-foreground/80">
                           {CLUSTER_LABEL[p.cluster] ?? p.cluster}
                         </td>
                         <td className="px-5 py-3 text-right">
@@ -118,16 +118,16 @@ export default function AdminPricingPage() {
                               min="1"
                               step="0.5"
                               autoFocus
-                              className="w-20 text-right px-2 py-1 rounded-lg border border-primary/50 bg-primary/5 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary/20"
+                              className="w-20 text-right px-2 py-1 rounded-lg border border-primary/50 bg-primary/5 text-sm font-semibold text-foreground outline-none focus:ring-2 focus:ring-primary/20"
                             />
                           ) : (
-                            <span className="font-semibold text-gray-900">₹{base}</span>
+                            <span className="font-bold text-foreground">₹{base}</span>
                           )}
                         </td>
-                        <td className="px-5 py-3 text-right text-gray-500">
+                        <td className="px-5 py-3 text-right text-muted-foreground">
                           ₹{isEditing ? (parseFloat(editVal) ? parseFloat(editVal) + 7 : '—') : base + 7}
                         </td>
-                        <td className="px-5 py-3 text-right text-gray-500">
+                        <td className="px-5 py-3 text-right text-muted-foreground">
                           ₹{isEditing ? (parseFloat(editVal) ? parseFloat(editVal) + 15 : '—') : base + 15}
                         </td>
                         <td className="px-5 py-3">
@@ -136,14 +136,14 @@ export default function AdminPricingPage() {
                               <button
                                 onClick={() => handleSave(p.id)}
                                 disabled={saving}
-                                className="w-7 h-7 flex items-center justify-center rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-50"
+                                className="w-7 h-7 flex items-center justify-center rounded-lg bg-primary text-primary-foreground hover:brightness-105 transition-all disabled:opacity-50"
                               >
                                 {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                               </button>
                               <button
                                 onClick={cancelEdit}
                                 disabled={saving}
-                                className="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                                className="w-7 h-7 flex items-center justify-center rounded-lg bg-muted text-foreground/80 hover:bg-muted/70 transition-colors"
                               >
                                 <X className="w-3.5 h-3.5" />
                               </button>
@@ -152,7 +152,7 @@ export default function AdminPricingPage() {
                             <div className="flex justify-end">
                               <button
                                 onClick={() => startEdit(p)}
-                                className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                                className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                               >
                                 <Pencil className="w-3.5 h-3.5" />
                               </button>

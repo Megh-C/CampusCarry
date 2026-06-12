@@ -5,6 +5,9 @@ import toast from 'react-hot-toast'
 import AuthLayout from '@/layouts/AuthLayout'
 import { authApi } from '@/api/auth'
 
+const inputCls =
+  'w-full px-4 py-3 rounded-xl border border-input bg-muted/40 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:bg-card disabled:opacity-60'
+
 export default function SignupInitiatePage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
@@ -41,22 +44,22 @@ export default function SignupInitiatePage() {
             <div
               key={step}
               className={`h-1.5 rounded-full transition-all ${
-                step === 1 ? 'w-6 bg-primary' : 'w-3 bg-gray-200'
+                step === 1 ? 'w-6 bg-primary' : 'w-3 bg-muted'
               }`}
             />
           ))}
         </div>
-        <span className="text-xs text-gray-400 ml-1">Step 1 of 3</span>
+        <span className="text-xs text-muted-foreground ml-1">Step 1 of 3</span>
       </div>
 
-      <h2 className="text-xl font-bold text-gray-900">Create account</h2>
-      <p className="text-sm text-gray-500 mt-1 mb-7">
+      <h2 className="text-xl font-extrabold text-foreground">Create account</h2>
+      <p className="text-sm text-muted-foreground mt-1 mb-7">
         Enter your college email to get started
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
             College Email
           </label>
           <input
@@ -66,12 +69,12 @@ export default function SignupInitiatePage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/15 focus:bg-white disabled:opacity-60"
+            className={inputCls}
           />
         </div>
 
         {error && (
-          <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+          <p className="text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2">
             {error}
           </p>
         )}
@@ -79,14 +82,14 @@ export default function SignupInitiatePage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+          className="w-full py-3 rounded-xl bg-gradient-to-br from-primary to-orange-600 text-white text-sm font-semibold shadow-lg shadow-primary/25 hover:brightness-105 active:scale-[0.98] transition-all disabled:opacity-60 flex items-center justify-center gap-2"
         >
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}
           {loading ? 'Sending OTP...' : 'Send OTP'}
         </button>
       </form>
 
-      <p className="text-xs text-gray-500 text-center mt-6">
+      <p className="text-xs text-muted-foreground text-center mt-6">
         Already have an account?{' '}
         <Link to="/login" className="text-primary font-semibold hover:underline">
           Sign in

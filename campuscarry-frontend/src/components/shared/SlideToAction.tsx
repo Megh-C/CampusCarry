@@ -47,17 +47,20 @@ export default function SlideToAction({ label, onAction, loading = false }: Prop
   return (
     <div
       ref={containerRef}
-      className="relative h-14 rounded-2xl overflow-hidden select-none border border-orange-200"
-      style={{
-        background: `linear-gradient(to right, #f97316 0%, #fb923c ${progress * 100}%, #fff7ed ${progress * 100}%)`,
-      }}
+      className="relative h-14 rounded-2xl overflow-hidden select-none border border-primary/25 bg-primary/10"
     >
+      {/* Progress fill */}
+      <div
+        className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-orange-500 pointer-events-none"
+        style={{ width: `${progress * 100}%` }}
+      />
+
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <span className="text-sm font-semibold text-orange-400">{label}</span>
+        <span className="text-sm font-semibold text-primary">{label}</span>
       </div>
 
       <div
-        className="absolute top-1 bottom-1 rounded-xl bg-orange-500 shadow-md flex items-center justify-center cursor-grab active:cursor-grabbing"
+        className="absolute top-1 bottom-1 rounded-xl bg-gradient-to-br from-primary to-orange-600 shadow-md shadow-primary/30 flex items-center justify-center cursor-grab active:cursor-grabbing"
         style={{
           left: PAD + dragX,
           width: THUMB_W,

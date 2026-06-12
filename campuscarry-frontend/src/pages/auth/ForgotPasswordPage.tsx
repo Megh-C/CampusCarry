@@ -5,6 +5,9 @@ import toast from 'react-hot-toast'
 import AuthLayout from '@/layouts/AuthLayout'
 import { authApi } from '@/api/auth'
 
+const inputCls =
+  'w-full px-4 py-3 rounded-xl border border-input bg-muted/40 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:bg-card disabled:opacity-60'
+
 export default function ForgotPasswordPage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
@@ -36,20 +39,20 @@ export default function ForgotPasswordPage() {
     <AuthLayout>
       <Link
         to="/login"
-        className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 mb-6 w-fit"
+        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mb-6 w-fit transition-colors"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         Back to login
       </Link>
 
-      <h2 className="text-xl font-bold text-gray-900">Forgot password?</h2>
-      <p className="text-sm text-gray-500 mt-1 mb-7">
+      <h2 className="text-xl font-extrabold text-foreground">Forgot password?</h2>
+      <p className="text-sm text-muted-foreground mt-1 mb-7">
         Enter your registered email and we'll send you a reset OTP
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
             Email
           </label>
           <input
@@ -59,12 +62,12 @@ export default function ForgotPasswordPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/15 focus:bg-white disabled:opacity-60"
+            className={inputCls}
           />
         </div>
 
         {error && (
-          <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+          <p className="text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2">
             {error}
           </p>
         )}
@@ -72,7 +75,7 @@ export default function ForgotPasswordPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+          className="w-full py-3 rounded-xl bg-gradient-to-br from-primary to-orange-600 text-white text-sm font-semibold shadow-lg shadow-primary/25 hover:brightness-105 active:scale-[0.98] transition-all disabled:opacity-60 flex items-center justify-center gap-2"
         >
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}
           {loading ? 'Sending OTP...' : 'Send Reset OTP'}

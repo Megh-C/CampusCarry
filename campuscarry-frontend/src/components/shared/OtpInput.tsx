@@ -56,7 +56,7 @@ export default function OtpInput({ value, onChange, length = 6, disabled = false
           onKeyDown={e => handleKeyDown(i, e)}
           onPaste={handlePaste}
           onFocus={e => e.target.select()}
-          className="w-11 h-14 rounded-xl border-2 border-gray-200 bg-gray-50 text-center text-xl font-bold font-mono text-gray-900 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/15 focus:bg-white disabled:opacity-50"
+          className="w-11 h-14 rounded-xl border-2 border-input bg-muted/40 text-center text-xl font-bold font-mono text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:bg-card disabled:opacity-50"
         />
       ))}
     </div>

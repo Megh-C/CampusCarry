@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { Order, OrderFeedItem, CreateOrderRequest, PageResponse } from '@/types'
+import type { Order, OrderFeedItem, CreateOrderRequest, PageResponse, FeeEstimate } from '@/types'
 
 export const ordersApi = {
   getFeed: (params?: { pickupLocationId?: string; page?: number; size?: number }) =>
@@ -36,5 +36,5 @@ export const ordersApi = {
     apiClient.get(`/orders/${id}/rating`),
 
   getEstimate: (params: { pickupLocationId: string; dropHostelBlock: string; size: string }) =>
-    apiClient.get('/orders/estimate', { params }),
+    apiClient.get<never, FeeEstimate>('/orders/estimate', { params }),
 }

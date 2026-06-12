@@ -7,11 +7,11 @@ import { ordersApi } from '@/api/orders'
 import type { Order, OrderStatus, PaymentStatus } from '@/types'
 
 const STATUS_STYLE: Record<OrderStatus, string> = {
-  PENDING:   'bg-blue-50 text-blue-600 border-blue-100',
-  ACCEPTED:  'bg-amber-50 text-amber-600 border-amber-100',
-  DELIVERED: 'bg-green-50 text-green-600 border-green-100',
-  EXPIRED:   'bg-gray-100 text-gray-500 border-gray-200',
-  UNPAID:    'bg-red-50 text-red-500 border-red-100',
+  PENDING:   'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+  ACCEPTED:  'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+  DELIVERED: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+  EXPIRED:   'bg-muted text-muted-foreground border-border',
+  UNPAID:    'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
 }
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
@@ -23,10 +23,10 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
 }
 
 const PAY_STYLE: Record<PaymentStatus, string> = {
-  PENDING:  'bg-gray-100 text-gray-500',
-  HELD:     'bg-blue-50 text-blue-600',
-  RELEASED: 'bg-green-50 text-green-600',
-  FAILED:   'bg-red-50 text-red-500',
+  PENDING:  'bg-muted text-muted-foreground',
+  HELD:     'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+  RELEASED: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+  FAILED:   'bg-red-500/10 text-red-600 dark:text-red-400',
 }
 
 const PAY_LABEL: Record<PaymentStatus, string> = {
@@ -87,16 +87,16 @@ export default function OrderDetailPage() {
       <div className="px-4 pt-4 pb-24 max-w-lg mx-auto space-y-3">
         {loading ? (
           <div className="flex justify-center py-24">
-            <Loader2 className="w-6 h-6 animate-spin text-gray-200" />
+            <Loader2 className="w-6 h-6 animate-spin text-primary/40" />
           </div>
         ) : !order ? (
-          <div className="py-20 text-center text-sm text-gray-400 font-medium">Order not found.</div>
+          <div className="py-20 text-center text-sm text-muted-foreground font-medium">Order not found.</div>
         ) : (
           <>
             {/* Header */}
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-400">#{order.orderNumber} · {formatDateTime(order.createdAt)}</p>
+                <p className="text-xs text-muted-foreground">#{order.orderNumber} · {formatDateTime(order.createdAt)}</p>
               </div>
               <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${STATUS_STYLE[order.status]}`}>
                 {STATUS_LABEL[order.status]}
@@ -104,38 +104,38 @@ export default function OrderDetailPage() {
             </div>
 
             {/* Route + item */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-4">
+            <div className="bg-card rounded-2xl border border-border shadow-sm p-4">
               <div className="flex items-center gap-2 mb-3">
-                <MapPin className="w-3.5 h-3.5 text-gray-400" />
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Route</span>
+                <MapPin className="w-3.5 h-3.5 text-primary" />
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Route</span>
               </div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="flex-1 bg-gray-50 rounded-xl px-3 py-2.5 text-center">
-                  <p className="text-xs text-gray-400 mb-0.5">Pickup</p>
-                  <p className="text-sm font-semibold text-gray-900">{order.pickupLocationName ?? '—'}</p>
+                <div className="flex-1 bg-muted/60 rounded-xl px-3 py-2.5 text-center">
+                  <p className="text-xs text-muted-foreground mb-0.5">Pickup</p>
+                  <p className="text-sm font-semibold text-foreground">{order.pickupLocationName ?? '—'}</p>
                 </div>
-                <span className="text-gray-300 font-bold">→</span>
-                <div className="flex-1 bg-gray-50 rounded-xl px-3 py-2.5 text-center">
-                  <p className="text-xs text-gray-400 mb-0.5">Drop</p>
-                  <p className="text-sm font-semibold text-gray-900">{order.dropHostelBlock.replace('_', ' ')}</p>
+                <span className="text-muted-foreground/50 font-bold">→</span>
+                <div className="flex-1 bg-muted/60 rounded-xl px-3 py-2.5 text-center">
+                  <p className="text-xs text-muted-foreground mb-0.5">Drop</p>
+                  <p className="text-sm font-semibold text-foreground">{order.dropHostelBlock.replace('_', ' ')}</p>
                 </div>
               </div>
               {order.description && (
-                <p className="text-xs text-gray-500 bg-gray-50 rounded-xl px-3 py-2.5 mb-3 leading-relaxed">
+                <p className="text-xs text-muted-foreground bg-muted/60 rounded-xl px-3 py-2.5 mb-3 leading-relaxed">
                   "{order.description}"
                 </p>
               )}
               <div className="flex items-center gap-2">
-                <span className="text-xs font-medium bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">{order.size}</span>
-                <span className="text-base font-bold text-gray-900">₹{Number(order.deliveryFee)}</span>
+                <span className="text-xs font-medium bg-muted text-muted-foreground px-2.5 py-1 rounded-full">{order.size}</span>
+                <span className="text-base font-extrabold text-foreground">₹{Number(order.deliveryFee)}</span>
               </div>
             </div>
 
             {/* Payment */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-4">
+            <div className="bg-card rounded-2xl border border-border shadow-sm p-4">
               <div className="flex items-center gap-2 mb-3">
-                <CreditCard className="w-3.5 h-3.5 text-gray-400" />
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Payment</span>
+                <CreditCard className="w-3.5 h-3.5 text-primary" />
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Payment</span>
               </div>
               <span className={`text-xs font-semibold px-3 py-1.5 rounded-full ${PAY_STYLE[order.paymentStatus]}`}>
                 {PAY_LABEL[order.paymentStatus]}
@@ -143,16 +143,16 @@ export default function OrderDetailPage() {
             </div>
 
             {/* People */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-4">
+            <div className="bg-card rounded-2xl border border-border shadow-sm p-4">
               <div className="flex items-center gap-2 mb-3">
-                <User className="w-3.5 h-3.5 text-gray-400" />
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">People</span>
+                <User className="w-3.5 h-3.5 text-primary" />
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide">People</span>
               </div>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-gray-400">Requester</p>
-                    <p className="text-sm font-semibold text-gray-900 mt-0.5">{order.requesterName}</p>
+                    <p className="text-xs text-muted-foreground">Requester</p>
+                    <p className="text-sm font-semibold text-foreground mt-0.5">{order.requesterName}</p>
                   </div>
                   {order.requesterPhone && (
                     <a href={`tel:${order.requesterPhone}`}
@@ -163,10 +163,10 @@ export default function OrderDetailPage() {
                   )}
                 </div>
                 {order.delivererName ? (
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+                  <div className="flex items-center justify-between pt-3 border-t border-border">
                     <div>
-                      <p className="text-xs text-gray-400">Deliverer</p>
-                      <p className="text-sm font-semibold text-gray-900 mt-0.5">{order.delivererName}</p>
+                      <p className="text-xs text-muted-foreground">Deliverer</p>
+                      <p className="text-sm font-semibold text-foreground mt-0.5">{order.delivererName}</p>
                     </div>
                     {order.delivererPhone && (
                       <a href={`tel:${order.delivererPhone}`}
@@ -177,31 +177,31 @@ export default function OrderDetailPage() {
                     )}
                   </div>
                 ) : (
-                  <div className="pt-3 border-t border-gray-50">
-                    <p className="text-xs text-gray-400">Deliverer</p>
-                    <p className="text-sm text-gray-400 mt-0.5">Not assigned yet</p>
+                  <div className="pt-3 border-t border-border">
+                    <p className="text-xs text-muted-foreground">Deliverer</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">Not assigned yet</p>
                   </div>
                 )}
               </div>
             </div>
 
             {/* Timeline */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-4">
+            <div className="bg-card rounded-2xl border border-border shadow-sm p-4">
               <div className="flex items-center gap-2 mb-3">
-                <Clock className="w-3.5 h-3.5 text-gray-400" />
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Timeline</span>
+                <Clock className="w-3.5 h-3.5 text-primary" />
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Timeline</span>
               </div>
               <div className="space-y-2.5">
                 {([
                   { label: 'Placed',    time: order.createdAt,   dot: 'bg-blue-400' },
                   { label: 'Expires',   time: order.expiresAt,   dot: 'bg-amber-400' },
                   { label: 'Accepted',  time: order.acceptedAt,  dot: 'bg-orange-400' },
-                  { label: 'Delivered', time: order.deliveredAt, dot: 'bg-green-400' },
+                  { label: 'Delivered', time: order.deliveredAt, dot: 'bg-emerald-400' },
                 ] as { label: string; time: string | null | undefined; dot: string }[]).map(({ label, time, dot }) => (
                   <div key={label} className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full shrink-0 ${time ? dot : 'bg-gray-200'}`} />
-                    <span className="text-xs text-gray-400 w-16">{label}</span>
-                    <span className={`text-xs ${time ? 'text-gray-700 font-medium' : 'text-gray-300'}`}>
+                    <div className={`w-2 h-2 rounded-full shrink-0 ${time ? dot : 'bg-muted-foreground/25'}`} />
+                    <span className="text-xs text-muted-foreground w-16">{label}</span>
+                    <span className={`text-xs ${time ? 'text-foreground font-medium' : 'text-muted-foreground/50'}`}>
                       {formatDateTime(time)}
                     </span>
                   </div>
@@ -211,44 +211,44 @@ export default function OrderDetailPage() {
 
             {/* Rating */}
             {order.status === 'DELIVERED' && (
-              <div className="bg-white rounded-2xl border border-gray-100 p-4">
+              <div className="bg-card rounded-2xl border border-border shadow-sm p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <Star className="w-3.5 h-3.5 text-gray-400" />
-                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Rating</span>
+                  <Star className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Rating</span>
                 </div>
                 {order.isRated ? (
                   order.ratingStars ? (
                     <div className="flex items-center gap-1.5">
                       <div className="flex items-center gap-0.5">
                         {[1,2,3,4,5].map(s => (
-                          <Star key={s} className={`w-5 h-5 ${s <= order.ratingStars! ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-100'}`} />
+                          <Star key={s} className={`w-5 h-5 ${s <= order.ratingStars! ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground/25 fill-muted'}`} />
                         ))}
                       </div>
-                      <span className="text-sm font-semibold text-gray-700">{order.ratingStars} / 5</span>
+                      <span className="text-sm font-semibold text-foreground">{order.ratingStars} / 5</span>
                     </div>
                   ) : (
-                    <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-green-50 text-green-600">Rated</span>
+                    <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">Rated</span>
                   )
                 ) : canRate ? (
                   <>
-                    <p className="text-xs text-gray-400 mb-3">
+                    <p className="text-xs text-muted-foreground mb-3">
                       Rate your experience with {order.delivererName}
                     </p>
                     <div className="flex gap-2 justify-center mb-2">
                       {[1, 2, 3, 4, 5].map(s => (
                         <button key={s} onClick={() => setSelectedStars(s)}
                           className="transition-transform active:scale-90">
-                          <Star className={`w-9 h-9 transition-colors ${s <= selectedStars ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-100'}`} />
+                          <Star className={`w-9 h-9 transition-colors ${s <= selectedStars ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground/25 fill-muted'}`} />
                         </button>
                       ))}
                     </div>
                     {selectedStars > 0 && (
-                      <p className="text-xs text-center text-gray-500 mb-3">{RATING_LABEL[selectedStars]}</p>
+                      <p className="text-xs text-center text-muted-foreground mb-3">{RATING_LABEL[selectedStars]}</p>
                     )}
                     <button
                       onClick={handleSubmitRating}
                       disabled={selectedStars === 0 || submitting}
-                      className="w-full py-2.5 rounded-xl bg-primary text-white text-sm font-semibold disabled:opacity-40 flex items-center justify-center gap-2"
+                      className="w-full py-2.5 rounded-xl bg-gradient-to-br from-primary to-orange-600 text-white text-sm font-semibold disabled:opacity-40 flex items-center justify-center gap-2"
                     >
                       {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                       Submit Rating

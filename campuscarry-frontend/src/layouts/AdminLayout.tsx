@@ -9,10 +9,12 @@ import {
   LogOut,
   Menu,
   X,
+  Package,
 } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/context/AuthContext'
+import ThemeToggle from '@/components/shared/ThemeToggle'
 
 const navItems = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
@@ -36,13 +38,13 @@ export default function AdminLayout() {
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       {/* Brand */}
-      <div className="flex items-center gap-2.5 px-4 py-5 border-b border-gray-100">
-        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-          <span className="text-white text-xs font-bold">CC</span>
+      <div className="flex items-center gap-2.5 px-4 py-5 border-b border-sidebar-border">
+        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-orange-600 flex items-center justify-center shadow-sm shadow-primary/30">
+          <Package className="w-4 h-4 text-white" />
         </div>
         <div>
-          <p className="font-bold text-gray-900 text-sm leading-tight">CampusCarry</p>
-          <p className="text-[10px] text-gray-400 font-medium">Admin Panel</p>
+          <p className="font-extrabold text-sidebar-foreground text-sm leading-tight tracking-tight">CampusCarry</p>
+          <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">Admin Panel</p>
         </div>
       </div>
 
@@ -58,8 +60,8 @@ export default function AdminLayout() {
               cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
                 isActive
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+                  ? 'bg-primary/12 text-primary shadow-[inset_2px_0_0] shadow-primary'
+                  : 'text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
               )
             }
           >
@@ -74,21 +76,21 @@ export default function AdminLayout() {
       </nav>
 
       {/* User + Logout */}
-      <div className="px-3 py-4 border-t border-gray-100">
+      <div className="px-3 py-4 border-t border-sidebar-border">
         <div className="flex items-center gap-3 px-3 py-2 mb-1">
-          <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center">
             <span className="text-primary text-xs font-bold">
               {user?.fullName?.[0]?.toUpperCase()}
             </span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-gray-800 truncate">{user?.fullName}</p>
-            <p className="text-[10px] text-gray-400">Admin</p>
+            <p className="text-xs font-semibold text-sidebar-foreground truncate">{user?.fullName}</p>
+            <p className="text-[10px] text-muted-foreground">Admin</p>
           </div>
         </div>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
         >
           <LogOut className="w-4 h-4" />
           Logout
@@ -98,16 +100,16 @@ export default function AdminLayout() {
   )
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-background flex">
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-56 flex-col bg-white border-r border-gray-100 fixed inset-y-0 left-0 z-30">
+      <aside className="hidden md:flex w-56 flex-col bg-sidebar border-r border-sidebar-border fixed inset-y-0 left-0 z-30">
         <SidebarContent />
       </aside>
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/30 md:hidden"
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -115,7 +117,7 @@ export default function AdminLayout() {
       {/* Mobile sidebar drawer */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-56 bg-white border-r border-gray-100 flex flex-col transition-transform duration-200 md:hidden',
+          'fixed inset-y-0 left-0 z-50 w-56 bg-sidebar border-r border-sidebar-border flex flex-col transition-transform duration-200 md:hidden',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
@@ -125,14 +127,17 @@ export default function AdminLayout() {
       {/* Main content */}
       <div className="flex-1 md:ml-56 flex flex-col min-h-screen">
         {/* Top bar */}
-        <header className="sticky top-0 z-20 bg-white border-b border-gray-100 h-14 flex items-center px-4 gap-3">
+        <header className="sticky top-0 z-20 bg-background/80 backdrop-blur-md border-b border-border h-14 flex items-center px-4 gap-3">
           <button
-            className="md:hidden w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100"
+            className="md:hidden w-9 h-9 flex items-center justify-center rounded-full hover:bg-muted"
             onClick={() => setSidebarOpen((v) => !v)}
           >
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
-          <h1 className="font-semibold text-gray-900 text-sm">Admin Panel</h1>
+          <h1 className="font-semibold text-foreground text-sm">Admin Panel</h1>
+          <div className="ml-auto">
+            <ThemeToggle />
+          </div>
         </header>
 
         {/* Page content */}

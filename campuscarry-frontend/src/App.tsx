@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from '@/context/AuthContext'
+import { ThemeProvider } from '@/context/ThemeContext'
 import ProtectedRoute from '@/components/shared/ProtectedRoute'
 import AppLayout from '@/layouts/AppLayout'
 import AdminLayout from '@/layouts/AdminLayout'
@@ -33,48 +34,58 @@ import NotFoundPage from '@/pages/NotFoundPage'
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          {/* ── Auth (public) ── */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupInitiatePage />} />
-          <Route path="/signup/verify-otp" element={<SignupVerifyPage />} />
-          <Route path="/signup/complete" element={<SignupCompletePage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
+    <ThemeProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <Routes>
+            {/* ── Auth (public) ── */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupInitiatePage />} />
+            <Route path="/signup/verify-otp" element={<SignupVerifyPage />} />
+            <Route path="/signup/complete" element={<SignupCompletePage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-          {/* ── Student app ── */}
-          <Route element={<ProtectedRoute role="STUDENT"><AppLayout /></ProtectedRoute>}>
-            <Route path="/" element={<FeedPage />} />
-            <Route path="/orders/new" element={<CreateOrderPage />} />
-            <Route path="/orders/me" element={<MyOrdersPage />} />
-            <Route path="/orders/:id" element={<OrderDetailPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-          </Route>
+            {/* ── Student app ── */}
+            <Route element={<ProtectedRoute role="STUDENT"><AppLayout /></ProtectedRoute>}>
+              <Route path="/" element={<FeedPage />} />
+              <Route path="/orders/new" element={<CreateOrderPage />} />
+              <Route path="/orders/me" element={<MyOrdersPage />} />
+              <Route path="/orders/:id" element={<OrderDetailPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+            </Route>
 
-          {/* ── Admin ── */}
-          <Route element={<ProtectedRoute role="ADMIN"><AdminLayout /></ProtectedRoute>}>
-            <Route path="/admin" element={<AdminDashboardPage />} />
-            <Route path="/admin/users" element={<AdminUsersPage />} />
-            <Route path="/admin/orders" element={<AdminOrdersPage />} />
-            <Route path="/admin/orders/:id" element={<AdminOrderDetailPage />} />
-            <Route path="/admin/locations" element={<AdminLocationsPage />} />
-            <Route path="/admin/pricing" element={<AdminPricingPage />} />
-            <Route path="/admin/payments/failed" element={<AdminFailedPaymentsPage />} />
-          </Route>
+            {/* ── Admin ── */}
+            <Route element={<ProtectedRoute role="ADMIN"><AdminLayout /></ProtectedRoute>}>
+              <Route path="/admin" element={<AdminDashboardPage />} />
+              <Route path="/admin/users" element={<AdminUsersPage />} />
+              <Route path="/admin/orders" element={<AdminOrdersPage />} />
+              <Route path="/admin/orders/:id" element={<AdminOrderDetailPage />} />
+              <Route path="/admin/locations" element={<AdminLocationsPage />} />
+              <Route path="/admin/pricing" element={<AdminPricingPage />} />
+              <Route path="/admin/payments/failed" element={<AdminFailedPaymentsPage />} />
+            </Route>
 
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
 
-        <Toaster
-          position="top-center"
-          toastOptions={{
-            duration: 3000,
-            style: { borderRadius: '12px', fontSize: '14px', fontWeight: '500' },
-          }}
-        />
-      </AuthProvider>
-    </BrowserRouter>
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              duration: 3000,
+              style: {
+                borderRadius: '14px',
+                fontSize: '14px',
+                fontWeight: '500',
+                background: 'var(--popover)',
+                color: 'var(--popover-foreground)',
+                border: '1px solid var(--border)',
+                boxShadow: '0 8px 30px rgb(0 0 0 / 0.12)',
+              },
+            }}
+          />
+        </AuthProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   )
 }

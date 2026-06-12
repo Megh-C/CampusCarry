@@ -10,8 +10,8 @@ const LH_BLOCKS = ['A_LH','B_LH','C_LH','D_LH','E_LH','F_LH','G_LH','H_LH','J_LH
 
 const AVATAR_COLORS = ['bg-violet-500','bg-blue-500','bg-emerald-500','bg-orange-500','bg-pink-500']
 
-const inputCls = 'w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/15 focus:bg-white disabled:opacity-60'
-const labelCls = 'text-xs font-semibold text-gray-500 uppercase tracking-wide'
+const inputCls = 'w-full px-4 py-3 rounded-xl border border-input bg-muted/40 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:bg-card disabled:opacity-60'
+const labelCls = 'text-xs font-semibold text-muted-foreground uppercase tracking-wide'
 
 function yearLabel(y: number) {
   return ['', '1st', '2nd', '3rd', '4th'][y] ? `${['','1st','2nd','3rd','4th'][y]} Year` : `Year ${y}`
@@ -25,7 +25,7 @@ function StarRating({ value }: { value: number }) {
   return (
     <div className="flex items-center gap-0.5">
       {[1,2,3,4,5].map(s => (
-        <Star key={s} className={`w-4 h-4 ${s <= Math.round(value) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-100'}`} />
+        <Star key={s} className={`w-4 h-4 ${s <= Math.round(value) ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground/25 fill-muted'}`} />
       ))}
     </div>
   )
@@ -112,7 +112,7 @@ export default function ProfilePage() {
     return (
       <>
         <TopBar title="Profile" showBack />
-        <div className="flex justify-center py-24"><Loader2 className="w-6 h-6 animate-spin text-gray-300" /></div>
+        <div className="flex justify-center py-24"><Loader2 className="w-6 h-6 animate-spin text-primary/40" /></div>
       </>
     )
   }
@@ -128,64 +128,65 @@ export default function ProfilePage() {
       <div className="px-4 pt-4 pb-24 max-w-lg mx-auto space-y-4">
 
         {/* ── Avatar + Identity ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          <div className="flex items-center gap-4">
-            <div className={`w-16 h-16 rounded-2xl ${avatarColor(profile.fullName)} flex items-center justify-center shrink-0`}>
+        <div className="bg-card rounded-3xl border border-border shadow-sm p-5 relative overflow-hidden">
+          <div aria-hidden className="absolute -top-16 -right-16 w-44 h-44 rounded-full bg-primary/10 blur-2xl pointer-events-none" />
+          <div className="flex items-center gap-4 relative">
+            <div className={`w-16 h-16 rounded-2xl ${avatarColor(profile.fullName)} flex items-center justify-center shrink-0 shadow-md ring-2 ring-background`}>
               <span className="text-white text-xl font-bold">{initials}</span>
             </div>
             <div className="min-w-0">
-              <h2 className="text-lg font-bold text-gray-900 truncate">{profile.fullName}</h2>
-              <p className="text-sm text-gray-400 truncate">{profile.email}</p>
+              <h2 className="text-lg font-extrabold text-foreground truncate">{profile.fullName}</h2>
+              <p className="text-sm text-muted-foreground truncate">{profile.email}</p>
               <div className="flex flex-wrap gap-1.5 mt-1.5">
                 <span className="text-xs bg-primary/10 text-primary font-semibold px-2 py-0.5 rounded-full">{yearLabel(profile.year)}</span>
-                <span className="text-xs bg-gray-100 text-gray-600 font-semibold px-2 py-0.5 rounded-full">{profile.hostelBlock.replace('_', ' ')}</span>
-                <span className="text-xs bg-gray-100 text-gray-600 font-semibold px-2 py-0.5 rounded-full capitalize">{profile.gender.toLowerCase()}</span>
+                <span className="text-xs bg-muted text-muted-foreground font-semibold px-2 py-0.5 rounded-full">{profile.hostelBlock.replace('_', ' ')}</span>
+                <span className="text-xs bg-muted text-muted-foreground font-semibold px-2 py-0.5 rounded-full capitalize">{profile.gender.toLowerCase()}</span>
               </div>
             </div>
           </div>
 
           {/* Stats row */}
-          <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-gray-100">
+          <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-border relative">
             <div className="text-center">
-              <p className="text-xl font-bold text-gray-900">{profile.totalDeliveries}</p>
-              <p className="text-xs text-gray-400 mt-0.5">Deliveries</p>
+              <p className="text-xl font-extrabold text-foreground">{profile.totalDeliveries}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Deliveries</p>
             </div>
-            <div className="text-center border-x border-gray-100">
+            <div className="text-center border-x border-border">
               {profile.rating != null && profile.totalDeliveries > 0 ? (
                 <>
                   <div className="flex justify-center">
                     <StarRating value={profile.rating} />
                   </div>
-                  <p className="text-xs text-gray-400 mt-0.5">{profile.rating.toFixed(1)} rating</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{profile.rating.toFixed(1)} rating</p>
                 </>
               ) : (
                 <>
-                  <p className="text-xl font-bold text-gray-300">—</p>
-                  <p className="text-xs text-gray-400 mt-0.5">No rating yet</p>
+                  <p className="text-xl font-extrabold text-muted-foreground/40">—</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">No rating yet</p>
                 </>
               )}
             </div>
             <div className="text-center">
-              <p className="text-xl font-bold text-gray-900">
+              <p className="text-xl font-extrabold text-foreground">
                 {(profile.activeSmall ?? 0) + (profile.activeMedium ?? 0) + (profile.activeLarge ?? 0)}
               </p>
-              <p className="text-xs text-gray-400 mt-0.5">Active orders</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Active orders</p>
             </div>
           </div>
         </div>
 
         {/* ── Edit Profile ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
           <button
             onClick={() => { setEditMode(v => !v); setPwOpen(false) }}
-            className="w-full flex items-center justify-between px-5 py-4"
+            className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/40 transition-colors"
           >
-            <span className="text-sm font-semibold text-gray-800">Edit Profile</span>
-            {editMode ? <X className="w-4 h-4 text-gray-400" /> : <Pencil className="w-4 h-4 text-gray-400" />}
+            <span className="text-sm font-semibold text-foreground">Edit Profile</span>
+            {editMode ? <X className="w-4 h-4 text-muted-foreground" /> : <Pencil className="w-4 h-4 text-muted-foreground" />}
           </button>
 
           {editMode && (
-            <div className="px-5 pb-5 space-y-4 border-t border-gray-100 pt-4">
+            <div className="px-5 pb-5 space-y-4 border-t border-border pt-4">
               <div className="space-y-1.5">
                 <label className={labelCls}>Full Name</label>
                 <input type="text" value={form.fullName} onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))} disabled={saving} className={inputCls} />
@@ -201,15 +202,15 @@ export default function ProfilePage() {
                 </select>
               </div>
               <div className="space-y-1.5">
-                <label className={labelCls}>UPI ID <span className="normal-case font-normal text-gray-400">(optional)</span></label>
+                <label className={labelCls}>UPI ID <span className="normal-case font-normal text-muted-foreground/70">(optional)</span></label>
                 <input type="text" placeholder="yourname@upi" value={form.upiId} onChange={e => setForm(f => ({ ...f, upiId: e.target.value }))} disabled={saving} className={inputCls} />
               </div>
               <div className="flex gap-2 pt-1">
-                <button onClick={handleSaveProfile} disabled={saving} className="flex-1 py-3 rounded-xl bg-primary text-white text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2">
+                <button onClick={handleSaveProfile} disabled={saving} className="flex-1 py-3 rounded-xl bg-gradient-to-br from-primary to-orange-600 text-white text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2">
                   {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                   {saving ? 'Saving...' : 'Save Changes'}
                 </button>
-                <button onClick={() => { setEditMode(false); setForm({ fullName: profile.fullName, phone: profile.phone, hostelBlock: profile.hostelBlock, upiId: profile.upiId ?? '' }) }} disabled={saving} className="px-4 py-3 rounded-xl bg-gray-100 text-sm font-semibold text-gray-600">
+                <button onClick={() => { setEditMode(false); setForm({ fullName: profile.fullName, phone: profile.phone, hostelBlock: profile.hostelBlock, upiId: profile.upiId ?? '' }) }} disabled={saving} className="px-4 py-3 rounded-xl bg-muted text-sm font-semibold text-foreground/80">
                   Cancel
                 </button>
               </div>
@@ -218,17 +219,17 @@ export default function ProfilePage() {
         </div>
 
         {/* ── Change Password ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
           <button
             onClick={() => { setPwOpen(v => !v); setEditMode(false) }}
-            className="w-full flex items-center justify-between px-5 py-4"
+            className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/40 transition-colors"
           >
-            <span className="text-sm font-semibold text-gray-800">Change Password</span>
-            {pwOpen ? <X className="w-4 h-4 text-gray-400" /> : <Pencil className="w-4 h-4 text-gray-400" />}
+            <span className="text-sm font-semibold text-foreground">Change Password</span>
+            {pwOpen ? <X className="w-4 h-4 text-muted-foreground" /> : <Pencil className="w-4 h-4 text-muted-foreground" />}
           </button>
 
           {pwOpen && (
-            <div className="px-5 pb-5 space-y-4 border-t border-gray-100 pt-4">
+            <div className="px-5 pb-5 space-y-4 border-t border-border pt-4">
               {(['currentPassword', 'newPassword', 'confirmNewPassword'] as const).map((field, i) => {
                 const labels = ['Current Password', 'New Password', 'Confirm New Password']
                 const showKeys = ['current', 'next', 'confirm'] as const
@@ -244,7 +245,7 @@ export default function ProfilePage() {
                         disabled={savingPw}
                         className={`${inputCls} pr-11`}
                       />
-                      <button type="button" onClick={() => setShowPw(s => ({ ...s, [showKeys[i]]: !s[showKeys[i]] }))} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                      <button type="button" onClick={() => setShowPw(s => ({ ...s, [showKeys[i]]: !s[showKeys[i]] }))} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                         {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
@@ -252,11 +253,11 @@ export default function ProfilePage() {
                 )
               })}
               <div className="flex gap-2 pt-1">
-                <button onClick={handleChangePassword} disabled={savingPw} className="flex-1 py-3 rounded-xl bg-primary text-white text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2">
+                <button onClick={handleChangePassword} disabled={savingPw} className="flex-1 py-3 rounded-xl bg-gradient-to-br from-primary to-orange-600 text-white text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2">
                   {savingPw && <Loader2 className="w-4 h-4 animate-spin" />}
                   {savingPw ? 'Saving...' : 'Update Password'}
                 </button>
-                <button onClick={() => { setPwOpen(false); setPw({ currentPassword: '', newPassword: '', confirmNewPassword: '' }) }} disabled={savingPw} className="px-4 py-3 rounded-xl bg-gray-100 text-sm font-semibold text-gray-600">
+                <button onClick={() => { setPwOpen(false); setPw({ currentPassword: '', newPassword: '', confirmNewPassword: '' }) }} disabled={savingPw} className="px-4 py-3 rounded-xl bg-muted text-sm font-semibold text-foreground/80">
                   Cancel
                 </button>
               </div>
@@ -265,7 +266,7 @@ export default function ProfilePage() {
         </div>
 
         {/* ── Read-only info ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <div className="bg-card rounded-2xl border border-border shadow-sm p-5">
           <p className={`${labelCls} mb-3`}>Account Info</p>
           <div className="space-y-3">
             {[
@@ -274,13 +275,13 @@ export default function ProfilePage() {
               { label: 'Phone', value: profile.phone },
             ].map(({ label, value }) => (
               <div key={label} className="flex items-center justify-between">
-                <span className="text-xs text-gray-400">{label}</span>
-                <span className="text-sm font-medium text-gray-700">{value}</span>
+                <span className="text-xs text-muted-foreground">{label}</span>
+                <span className="text-sm font-medium text-foreground/80">{value}</span>
               </div>
             ))}
             <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-400">Status</span>
-              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${profile.status === 'ACTIVE' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500'}`}>
+              <span className="text-xs text-muted-foreground">Status</span>
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${profile.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/10 text-red-600 dark:text-red-400'}`}>
                 {profile.status}
               </span>
             </div>

@@ -66,25 +66,25 @@ export default function SignupVerifyPage() {
             <div
               key={step}
               className={`h-1.5 rounded-full transition-all ${
-                step <= 2 ? 'w-6 bg-primary' : 'w-3 bg-gray-200'
+                step <= 2 ? 'w-6 bg-primary' : 'w-3 bg-muted'
               }`}
             />
           ))}
         </div>
-        <span className="text-xs text-gray-400 ml-1">Step 2 of 3</span>
+        <span className="text-xs text-muted-foreground ml-1">Step 2 of 3</span>
       </div>
 
-      <h2 className="text-xl font-bold text-gray-900">Verify your email</h2>
-      <p className="text-sm text-gray-500 mt-1 mb-2">
+      <h2 className="text-xl font-extrabold text-foreground">Verify your email</h2>
+      <p className="text-sm text-muted-foreground mt-1 mb-2">
         We sent a 6-digit code to
       </p>
-      <p className="text-sm font-semibold text-gray-800 mb-7 truncate">{email}</p>
+      <p className="text-sm font-semibold text-foreground mb-7 truncate">{email}</p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <OtpInput value={otp} onChange={setOtp} disabled={loading} />
 
         {error && (
-          <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2 text-center">
+          <p className="text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2 text-center">
             {error}
           </p>
         )}
@@ -92,7 +92,7 @@ export default function SignupVerifyPage() {
         <button
           type="submit"
           disabled={loading || otp.length < 6}
-          className="w-full py-3 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+          className="w-full py-3 rounded-xl bg-gradient-to-br from-primary to-orange-600 text-white text-sm font-semibold shadow-lg shadow-primary/25 hover:brightness-105 active:scale-[0.98] transition-all disabled:opacity-60 flex items-center justify-center gap-2"
         >
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}
           {loading ? 'Verifying...' : 'Verify OTP'}
@@ -100,7 +100,7 @@ export default function SignupVerifyPage() {
       </form>
 
       <div className="text-center mt-5">
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-muted-foreground">
           Didn't receive it?{' '}
           <button
             onClick={handleResend}

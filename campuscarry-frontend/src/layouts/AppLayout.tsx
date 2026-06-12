@@ -8,11 +8,11 @@ interface Props {
 
 export default function AppLayout({ topBar, hideTopBar }: Props) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {!hideTopBar && topBar}
 
-      {/* Content — padded top for TopBar, bottom for BottomNav */}
-      <main className="max-w-lg mx-auto pt-14 pb-24 min-h-screen">
+      {/* Content — padded top for TopBar, bottom for floating BottomNav */}
+      <main className="max-w-lg mx-auto pt-14 pb-28 min-h-screen">
         <Outlet />
       </main>
 

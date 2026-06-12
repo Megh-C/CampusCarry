@@ -7,6 +7,11 @@ import { authApi } from '@/api/auth'
 import { useAuth } from '@/context/AuthContext'
 import type { AuthResponse } from '@/types'
 
+const inputCls =
+  'w-full px-4 py-3 rounded-xl border border-input bg-muted/40 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:bg-card disabled:opacity-60'
+
+const labelCls = 'text-xs font-semibold text-muted-foreground uppercase tracking-wide'
+
 export default function LoginPage() {
   const navigate = useNavigate()
   const { login } = useAuth()
@@ -41,15 +46,13 @@ export default function LoginPage() {
 
   return (
     <AuthLayout>
-      <h2 className="text-xl font-bold text-gray-900">Welcome back</h2>
-      <p className="text-sm text-gray-500 mt-1 mb-7">Sign in to your account</p>
+      <h2 className="text-xl font-extrabold text-foreground">Welcome back</h2>
+      <p className="text-sm text-muted-foreground mt-1 mb-7">Sign in to your account</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Email */}
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
-            Email
-          </label>
+          <label className={labelCls}>Email</label>
           <input
             type="email"
             autoComplete="email"
@@ -57,15 +60,13 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/15 focus:bg-white disabled:opacity-60"
+            className={inputCls}
           />
         </div>
 
         {/* Password */}
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
-            Password
-          </label>
+          <label className={labelCls}>Password</label>
           <div className="relative">
             <input
               type={showPassword ? 'text' : 'password'}
@@ -74,12 +75,12 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
-              className="w-full px-4 py-3 pr-11 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/15 focus:bg-white disabled:opacity-60"
+              className={`${inputCls} pr-11`}
             />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
@@ -98,7 +99,7 @@ export default function LoginPage() {
 
         {/* Error */}
         {error && (
-          <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+          <p className="text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2">
             {error}
           </p>
         )}
@@ -107,7 +108,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-1"
+          className="w-full py-3 rounded-xl bg-gradient-to-br from-primary to-orange-600 text-white text-sm font-semibold shadow-lg shadow-primary/25 hover:brightness-105 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-1"
         >
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}
           {loading ? 'Signing in...' : 'Sign in'}
@@ -115,7 +116,7 @@ export default function LoginPage() {
       </form>
 
       {/* Sign up link */}
-      <p className="text-xs text-gray-500 text-center mt-6">
+      <p className="text-xs text-muted-foreground text-center mt-6">
         Don't have an account?{' '}
         <Link to="/signup" className="text-primary font-semibold hover:underline">
           Create one
